@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 
 // Common
@@ -44,12 +44,15 @@ const RootRedirect = () => {
 
 const App = () => {
   const { loading } = useAuth();
+  const location = useLocation();
 
   if (loading) return <LoadingSpinner text="Loading…" />;
 
+  const hideNavbar = ['/login', '/register'].includes(location.pathname);
+
   return (
     <>
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <Routes>
         {/* Root */}
         <Route path="/" element={<RootRedirect />} />
