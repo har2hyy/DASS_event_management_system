@@ -22,72 +22,72 @@ const TicketView = () => {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8 md:py-10">
-      <button onClick={() => navigate(-1)} className="text-sm md:text-base text-indigo-600 hover:underline mb-4 block">
+      <button onClick={() => navigate(-1)} className="text-sm md:text-base text-indigo-400 hover:underline mb-4 block">
         ← Back
       </button>
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+      <div className="bg-[#12122a] rounded-2xl shadow-lg border border-indigo-500/20 p-6 md:p-8">
         <div className="text-center mb-6">
-          <h1 className="text-xl md:text-2xl font-bold text-indigo-600 mb-1">🎫 Your Ticket</h1>
-          <p className="text-gray-500">Felicity 2026</p>
+          <h1 className="text-xl md:text-2xl font-bold text-indigo-400 mb-1">🎫 Your Ticket</h1>
+          <p className="text-gray-400">Felicity 2026</p>
         </div>
 
         {reg.qrCode && (
           <div className="flex justify-center mb-6">
-            <img src={reg.qrCode} alt="QR Code" className="w-40 h-40 rounded-xl border border-gray-200" />
+            <img src={reg.qrCode} alt="QR Code" className="w-40 h-40 rounded-xl border border-white/10" />
           </div>
         )}
 
         <div className="space-y-3 text-sm">
-          <div className="flex justify-between py-2 border-b border-gray-100">
-            <span className="text-gray-500">Ticket ID</span>
-            <span className="font-mono font-semibold text-gray-800">{reg.ticketId}</span>
+          <div className="flex justify-between py-2 border-b border-white/10">
+            <span className="text-gray-400">Ticket ID</span>
+            <span className="font-mono font-semibold text-gray-100">{reg.ticketId}</span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-100">
-            <span className="text-gray-500">Event</span>
-            <span className="font-semibold text-gray-800">{reg.event?.eventName}</span>
+          <div className="flex justify-between py-2 border-b border-white/10">
+            <span className="text-gray-400">Event</span>
+            <span className="font-semibold text-gray-100">{reg.event?.eventName}</span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-100">
-            <span className="text-gray-500">Organizer</span>
-            <span className="text-gray-700">{reg.event?.organizer?.organizerName}</span>
+          <div className="flex justify-between py-2 border-b border-white/10">
+            <span className="text-gray-400">Organizer</span>
+            <span className="text-gray-300">{reg.event?.organizer?.organizerName}</span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-100">
-            <span className="text-gray-500">Date</span>
-            <span className="text-gray-700">{new Date(reg.event?.eventStartDate).toDateString()}</span>
+          <div className="flex justify-between py-2 border-b border-white/10">
+            <span className="text-gray-400">Date</span>
+            <span className="text-gray-300">{new Date(reg.event?.eventStartDate).toDateString()}</span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-100">
-            <span className="text-gray-500">Participant</span>
-            <span className="text-gray-700">
+          <div className="flex justify-between py-2 border-b border-white/10">
+            <span className="text-gray-400">Participant</span>
+            <span className="text-gray-300">
               {reg.participant?.firstName} {reg.participant?.lastName}
             </span>
           </div>
-          <div className="flex justify-between py-2 border-b border-gray-100">
-            <span className="text-gray-500">Status</span>
+          <div className="flex justify-between py-2 border-b border-white/10">
+            <span className="text-gray-400">Status</span>
             <StatusBadge status={reg.status} />
           </div>
           {reg.event?.eventType === 'Merchandise' && reg.merchandiseDetails && (
             <>
               {reg.merchandiseDetails.size && (
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500">Size</span>
-                  <span className="text-gray-700">{reg.merchandiseDetails.size}</span>
+                <div className="flex justify-between py-2 border-b border-white/10">
+                  <span className="text-gray-400">Size</span>
+                  <span className="text-gray-300">{reg.merchandiseDetails.size}</span>
                 </div>
               )}
               {reg.merchandiseDetails.color && (
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500">Color</span>
-                  <span className="text-gray-700">{reg.merchandiseDetails.color}</span>
+                <div className="flex justify-between py-2 border-b border-white/10">
+                  <span className="text-gray-400">Color</span>
+                  <span className="text-gray-300">{reg.merchandiseDetails.color}</span>
                 </div>
               )}
-              <div className="flex justify-between py-2 border-b border-gray-100">
-                <span className="text-gray-500">Quantity</span>
-                <span className="text-gray-700">{reg.merchandiseDetails.quantity}</span>
+              <div className="flex justify-between py-2 border-b border-white/10">
+                <span className="text-gray-400">Quantity</span>
+                <span className="text-gray-300">{reg.merchandiseDetails.quantity}</span>
               </div>
             </>
           )}
           <div className="flex justify-between py-2">
-            <span className="text-gray-500">Registered At</span>
-            <span className="text-gray-700">{new Date(reg.createdAt).toLocaleString()}</span>
+            <span className="text-gray-400">Registered At</span>
+            <span className="text-gray-300">{new Date(reg.createdAt).toLocaleString()}</span>
           </div>
         </div>
 

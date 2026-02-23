@@ -13,6 +13,13 @@ export const AuthProvider = ({ children }) => {
   const [user,    setUser]    = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const getAuthErrorMessage = (err, fallback) => {
+    if (err.response?.data?.message) return err.response.data.message;
+    if (err.code === 'ECONNABORTED') return 'Request timed out. Please try again.';
+    if (err.message === 'Network Error') return 'Cannot reach server. Check API URL/CORS/backend status.';
+    return fallback;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) loadUser();
@@ -39,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data.user);
       return { success: true, user: res.data.user };
     } catch (err) {
-      return { success: false, message: err.response?.data?.message || 'Login failed' };
+      return { success: false, message: getAuthErrorMessage(err, 'Login failed') };
     }
   };
 
@@ -51,7 +58,7 @@ export const AuthProvider = ({ children }) => {
       setUser(res.data.user);
       return { success: true, user: res.data.user };
     } catch (err) {
-      return { success: false, message: err.response?.data?.message || 'Registration failed' };
+      return { success: false, message: getAuthErrorMessage(err, 'Registration failed') };
     }
   };
 

@@ -25,29 +25,29 @@ const OrganizerDetail = () => {
 
   return (
     <div className="w-full px-6 lg:px-12 py-8">
-      <button onClick={() => navigate(-1)} className="text-sm text-indigo-600 hover:underline mb-4 block">
+      <button onClick={() => navigate(-1)} className="text-sm text-indigo-400 hover:underline mb-4 block">
         ← Back
       </button>
 
       {/* Organizer Info */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+      <div className="bg-[#12122a] rounded-2xl border border-indigo-500/20 p-6 mb-6">
         <div className="flex items-start justify-between gap-4 mb-2">
-          <h1 className="text-2xl font-bold text-gray-800">{organizer.organizerName}</h1>
-          <span className="bg-purple-50 text-purple-700 text-sm px-3 py-1 rounded-full font-medium">
+          <h1 className="text-2xl font-bold text-gray-100">{organizer.organizerName}</h1>
+          <span className="bg-purple-500/20 text-purple-400 text-sm px-3 py-1 rounded-full font-medium">
             {organizer.category}
           </span>
         </div>
-        {organizer.description && <p className="text-gray-600 mb-3">{organizer.description}</p>}
+        {organizer.description && <p className="text-gray-400 mb-3">{organizer.description}</p>}
         {organizer.contactEmail && (
           <p className="text-sm text-gray-500">✉️ {organizer.contactEmail}</p>
         )}
       </div>
 
       {/* Events tabs */}
-      <div className="flex gap-1 mb-5 bg-gray-100 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 mb-5 bg-white/5 rounded-xl p-1 w-fit">
         {[['upcoming', `Upcoming (${upcomingEvents.length})`], ['past', `Past (${pastEvents.length})`]].map(([t, l]) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}>
+            className={`px-5 py-2 rounded-lg text-sm font-medium transition ${tab === t ? 'bg-indigo-600 shadow text-white' : 'text-gray-400 hover:text-gray-200'}`}>
             {l}
           </button>
         ))}

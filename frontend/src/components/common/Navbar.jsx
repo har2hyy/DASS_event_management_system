@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import felicityLogo from '../../assets/felicity_logo.png';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -36,12 +37,12 @@ const Navbar = () => {
     : [];
 
   return (
-    <nav className="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
+    <nav className="bg-[#0d0d1a]/95 text-white shadow-lg sticky top-0 z-50 border-b border-indigo-500/20 backdrop-blur-md">
       <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24">
         <div className="flex items-center justify-between h-14 md:h-16">
           {/* Left: Brand */}
-          <Link to="/" className="text-lg md:text-xl font-bold tracking-wide flex items-center gap-2 shrink-0">
-            🎉 <span>Felicity 2026</span>
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <img src={felicityLogo} alt="Felicity 2026" className="h-8 md:h-10" style={{ filter: 'brightness(0) invert(1)' }} />
           </Link>
 
           {/* Center: Nav links (desktop) */}
@@ -51,7 +52,7 @@ const Navbar = () => {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition ${isActive(link.to)}`}
+                  className={`px-3 py-2 text-sm font-medium transition ${location.pathname.startsWith(link.to) ? 'text-indigo-400 bg-indigo-500/10 border-b-2 border-indigo-400' : 'text-gray-300 hover:text-white hover:bg-white/5'}`}
                 >
                   {link.label}
                 </Link>
@@ -67,7 +68,7 @@ const Navbar = () => {
               </span>
               <button
                 onClick={logout}
-                className="bg-white/90 text-indigo-600 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-white transition"
+                className="border border-indigo-500/50 text-indigo-400 px-5 py-2 text-sm font-semibold hover:bg-indigo-500/20 transition"
               >
                 Logout
               </button>
@@ -78,7 +79,7 @@ const Navbar = () => {
           {user && (
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-indigo-700 transition"
+              className="md:hidden p-2 hover:bg-white/10 transition"
               aria-label="Toggle menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,25 +96,25 @@ const Navbar = () => {
 
       {/* Mobile menu */}
       {user && mobileOpen && (
-        <div className="md:hidden border-t border-indigo-500 bg-indigo-700">
+        <div className="md:hidden border-t border-indigo-500/20 bg-[#0d0d1a]/98">
           <div className="px-4 py-3 space-y-1">
             {links.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
                 onClick={() => setMobileOpen(false)}
-                className={`block px-3 py-2 rounded-lg text-sm font-medium transition ${isActive(link.to)}`}
+                className={`block px-3 py-2 text-sm font-medium transition ${location.pathname.startsWith(link.to) ? 'text-indigo-400 bg-indigo-500/10' : 'text-gray-300 hover:text-white hover:bg-white/5'}`}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="pt-3 mt-2 border-t border-indigo-500 flex items-center justify-between">
-              <span className="text-sm text-indigo-200">
+            <div className="pt-3 mt-2 border-t border-indigo-500/20 flex items-center justify-between">
+              <span className="text-sm text-gray-400">
                 {user.firstName || user.organizerName || 'Admin'}
               </span>
               <button
                 onClick={logout}
-                className="bg-white/90 text-indigo-600 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-white transition"
+                className="border border-indigo-500/50 text-indigo-400 px-5 py-2 text-sm font-semibold hover:bg-indigo-500/20 transition"
               >
                 Logout
               </button>

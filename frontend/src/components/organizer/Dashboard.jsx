@@ -6,10 +6,10 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import StatusBadge from '../common/StatusBadge';
 
 const STAT_COLORS = {
-  indigo: 'text-indigo-600 bg-indigo-50 border-indigo-100',
-  blue:   'text-blue-600 bg-blue-50 border-blue-100',
-  green:  'text-green-600 bg-green-50 border-green-100',
-  purple: 'text-purple-600 bg-purple-50 border-purple-100',
+  indigo: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30',
+  blue:   'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  green:  'text-green-400 bg-green-500/10 border-green-500/30',
+  purple: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
 };
 
 const OrganizerDashboard = () => {
@@ -50,7 +50,7 @@ const OrganizerDashboard = () => {
   }, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="min-h-screen bg-[#0a0a14]">
     <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -85,38 +85,38 @@ const OrganizerDashboard = () => {
       <div className="flex gap-2 mb-4 flex-wrap">
         {statuses.map((s) => (
           <button key={s} onClick={() => setFilter(s)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${filter === s ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'}`}>
+            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${filter === s ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/5 text-gray-400 border-gray-600 hover:border-indigo-400'}`}>
             {s}
           </button>
         ))}
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-12 text-gray-400 bg-white rounded-xl border border-gray-100">
+        <div className="text-center py-12 text-gray-400 bg-[#12122a] rounded-xl border border-indigo-500/20">
           No events in this category.{' '}
-          <Link to="/organizer/create-event" className="text-indigo-600 hover:underline">Create one →</Link>
+          <Link to="/organizer/create-event" className="text-indigo-400 hover:underline">Create one →</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((ev) => {
             const analytics = data.analytics[ev._id.toString()] || {};
             return (
-              <div key={ev._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
+              <div key={ev._id} className="bg-[#12122a] rounded-xl border border-indigo-500/20 p-5 hover:border-indigo-500/40 transition">
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-semibold text-gray-800 line-clamp-2">{ev.eventName}</h3>
+                  <h3 className="font-semibold text-gray-100 line-clamp-2">{ev.eventName}</h3>
                   <StatusBadge status={ev.status} />
                 </div>
-                <p className="text-xs text-gray-400 mb-1">{ev.eventType}</p>
-                <p className="text-xs text-gray-500 mb-3">
+                <p className="text-xs text-gray-500 mb-1">{ev.eventType}</p>
+                <p className="text-xs text-gray-400 mb-3">
                   📅 {new Date(ev.eventStartDate).toLocaleDateString()}
                 </p>
-                <p className="text-xs text-gray-500 mb-3">
+                <p className="text-xs text-gray-400 mb-3">
                   👥 {ev.currentRegistrations}/{ev.registrationLimit} registered
                 </p>
                 {ev.status === 'Completed' && (
-                  <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50 rounded-lg p-2 mb-3">
-                    <div><span className="text-gray-400">Attended</span><br/><span className="font-semibold">{analytics.attended || 0}</span></div>
-                    <div><span className="text-gray-400">Revenue</span><br/><span className="font-semibold">₹{analytics.revenue || 0}</span></div>
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-white/5 rounded-lg p-2 mb-3">
+                    <div><span className="text-gray-500">Attended</span><br/><span className="font-semibold text-gray-200">{analytics.attended || 0}</span></div>
+                    <div><span className="text-gray-500">Revenue</span><br/><span className="font-semibold text-gray-200">₹{analytics.revenue || 0}</span></div>
                   </div>
                 )}
                 <Link to={`/organizer/events/${ev._id}`}

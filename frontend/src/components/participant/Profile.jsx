@@ -69,50 +69,50 @@ const ParticipantProfile = () => {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 md:py-10">
-      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-6">My Profile</h1>
+      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-100 mb-6">My Profile</h1>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg md:rounded-xl p-1 w-fit">
+      <div className="flex gap-1 mb-6 bg-white/5 rounded-lg md:rounded-xl p-1 w-fit">
         {['profile', 'security'].map((t) => (
           <button key={t} onClick={() => { setTab(t); setMsg(''); setPwMsg(''); }}
-            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition capitalize ${tab === t ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}>
+            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition capitalize ${tab === t ? 'bg-indigo-600 shadow text-white' : 'text-gray-400 hover:text-gray-200'}`}>
             {t}
           </button>
         ))}
       </div>
 
       {tab === 'profile' && (
-        <form onSubmit={saveProfile} className="space-y-4 bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100">
+        <form onSubmit={saveProfile} className="space-y-4 bg-[#12122a] rounded-2xl p-5 md:p-6 border border-indigo-500/20">
           {/* Non-editable */}
-          <div className="grid grid-cols-2 gap-4 text-sm text-gray-500 bg-gray-50 rounded-xl p-4">
-            <div><p className="text-xs uppercase text-gray-400">Email</p><p className="font-medium text-gray-700">{user.email}</p></div>
-            <div><p className="text-xs uppercase text-gray-400">Type</p><p className="font-medium text-gray-700">{user.participantType}</p></div>
+          <div className="grid grid-cols-2 gap-4 text-sm text-gray-400 bg-white/5 rounded-xl p-4">
+            <div><p className="text-xs uppercase text-gray-500">Email</p><p className="font-medium text-gray-200">{user.email}</p></div>
+            <div><p className="text-xs uppercase text-gray-500">Type</p><p className="font-medium text-gray-200">{user.participantType}</p></div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {[['firstName', 'First Name'], ['lastName', 'Last Name']].map(([n, l]) => (
               <div key={n}>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{l}</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1">{l}</label>
                 <input type="text" value={form[n]} onChange={(e) => setForm({ ...form, [n]: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                  className="w-full bg-white/5 border border-gray-600 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
               </div>
             ))}
           </div>
 
           {[['contactNumber', 'Contact Number', 'tel'], ['college', 'College / Organisation', 'text']].map(([n, l, t]) => (
             <div key={n}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{l}</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">{l}</label>
               <input type={t} value={form[n]} onChange={(e) => setForm({ ...form, [n]: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                className="w-full bg-white/5 border border-gray-600 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
           ))}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Areas of Interest</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Areas of Interest</label>
             <div className="flex flex-wrap gap-2">
               {INTERESTS.map((i) => (
                 <button type="button" key={i} onClick={() => toggleInterest(i)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${form.interests.includes(i) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'}`}>
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${form.interests.includes(i) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/5 text-gray-400 border-gray-600 hover:border-indigo-400'}`}>
                   {i}
                 </button>
               ))}
@@ -120,7 +120,7 @@ const ParticipantProfile = () => {
           </div>
 
           {msg && (
-            <div className={`rounded-lg px-4 py-3 text-sm ${msg.startsWith('✅') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+            <div className={`rounded-lg px-4 py-3 text-sm ${msg.startsWith('✅') ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
               {msg}
             </div>
           )}
@@ -133,22 +133,22 @@ const ParticipantProfile = () => {
       )}
 
       {tab === 'security' && (
-        <form onSubmit={changePassword} className="space-y-4 bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100">
-          <h2 className="text-base md:text-lg font-semibold text-gray-700">Change Password</h2>
+        <form onSubmit={changePassword} className="space-y-4 bg-[#12122a] rounded-2xl p-5 md:p-6 border border-indigo-500/20">
+          <h2 className="text-base md:text-lg font-semibold text-gray-200">Change Password</h2>
           {[
             ['currentPassword', 'Current Password'],
             ['newPassword', 'New Password'],
             ['confirmNew', 'Confirm New Password'],
           ].map(([n, l]) => (
             <div key={n}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{l}</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">{l}</label>
               <input type="password" value={pwForm[n]}
                 onChange={(e) => setPwForm({ ...pwForm, [n]: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                className="w-full bg-white/5 border border-gray-600 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
           ))}
           {pwMsg && (
-            <div className={`rounded-lg px-4 py-3 text-sm ${pwMsg.startsWith('✅') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+            <div className={`rounded-lg px-4 py-3 text-sm ${pwMsg.startsWith('✅') ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
               {pwMsg}
             </div>
           )}

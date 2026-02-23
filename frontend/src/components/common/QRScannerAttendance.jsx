@@ -138,17 +138,17 @@ const QRScannerAttendance = ({ eventId }) => {
       {/* Live Stats */}
       {stats && (
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-100 shadow-sm text-center">
-            <p className="text-xl md:text-2xl font-bold text-indigo-600">{stats.totalRegistrations}</p>
-            <p className="text-xs md:text-sm text-gray-500">Total Registered</p>
+          <div className="bg-[#12122a] rounded-lg md:rounded-xl p-3 md:p-4 border border-indigo-500/20 text-center">
+            <p className="text-xl md:text-2xl font-bold text-indigo-400">{stats.totalRegistrations}</p>
+            <p className="text-xs md:text-sm text-gray-400">Total Registered</p>
           </div>
-          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-100 shadow-sm text-center">
-            <p className="text-xl md:text-2xl font-bold text-green-600">{stats.attended}</p>
-            <p className="text-xs md:text-sm text-gray-500">Checked In</p>
+          <div className="bg-[#12122a] rounded-lg md:rounded-xl p-3 md:p-4 border border-indigo-500/20 text-center">
+            <p className="text-xl md:text-2xl font-bold text-green-400">{stats.attended}</p>
+            <p className="text-xs md:text-sm text-gray-400">Checked In</p>
           </div>
-          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-100 shadow-sm text-center">
-            <p className="text-xl md:text-2xl font-bold text-purple-600">{stats.attendanceRate}%</p>
-            <p className="text-xs text-gray-500">Attendance Rate</p>
+          <div className="bg-[#12122a] rounded-lg md:rounded-xl p-3 md:p-4 border border-indigo-500/20 text-center">
+            <p className="text-xl md:text-2xl font-bold text-purple-400">{stats.attendanceRate}%</p>
+            <p className="text-xs text-gray-400">Attendance Rate</p>
           </div>
         </div>
       )}
@@ -158,7 +158,7 @@ const QRScannerAttendance = ({ eventId }) => {
         <button
           onClick={() => setMode('manual')}
           className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition ${
-            mode === 'manual' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            mode === 'manual' ? 'bg-indigo-600 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/15'
           }`}
         >
           Manual Entry
@@ -166,7 +166,7 @@ const QRScannerAttendance = ({ eventId }) => {
         <button
           onClick={() => setMode('scanner')}
           className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition ${
-            mode === 'scanner' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            mode === 'scanner' ? 'bg-indigo-600 text-white' : 'bg-white/10 text-gray-400 hover:bg-white/15'
           }`}
         >
           📷 QR Scanner
@@ -174,7 +174,7 @@ const QRScannerAttendance = ({ eventId }) => {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-4 py-3 text-sm">{error}</div>
       )}
 
       {/* Scanner */}
@@ -197,7 +197,7 @@ const QRScannerAttendance = ({ eventId }) => {
             value={ticketId}
             onChange={(e) => setTicketId(e.target.value.toUpperCase())}
             placeholder="Enter ticket ID (e.g. FEL-...)"
-            className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="flex-1 bg-white/5 border border-gray-600 rounded-xl px-4 py-3 text-sm font-mono text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <button
             type="submit"
@@ -213,8 +213,8 @@ const QRScannerAttendance = ({ eventId }) => {
       {result && (
         <div className={`rounded-xl p-4 border text-sm ${
           result.success
-            ? 'bg-green-50 border-green-200 text-green-700'
-            : 'bg-red-50 border-red-200 text-red-700'
+            ? 'bg-green-500/10 border-green-500/30 text-green-400'
+            : 'bg-red-500/10 border-red-500/30 text-red-400'
         }`}>
           <p className="font-semibold">{result.message}</p>
           <p className="font-mono text-xs mt-1">{result.ticketId}</p>
@@ -225,22 +225,22 @@ const QRScannerAttendance = ({ eventId }) => {
       {/* Recent check-ins */}
       {recentCheckins.length > 0 && (
         <div>
-          <h3 className="font-semibold text-gray-700 mb-2">Recent Check-ins</h3>
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <h3 className="font-semibold text-gray-200 mb-2">Recent Check-ins</h3>
+          <div className="bg-[#12122a] rounded-xl border border-indigo-500/20 overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
+              <thead className="bg-white/5 border-b border-white/10">
                 <tr>
-                  <th className="text-left px-4 py-2 text-xs font-semibold text-gray-500">Name</th>
-                  <th className="text-left px-4 py-2 text-xs font-semibold text-gray-500">Ticket</th>
-                  <th className="text-left px-4 py-2 text-xs font-semibold text-gray-500">Time</th>
+                  <th className="text-left px-4 py-2 text-xs font-semibold text-gray-400">Name</th>
+                  <th className="text-left px-4 py-2 text-xs font-semibold text-gray-400">Ticket</th>
+                  <th className="text-left px-4 py-2 text-xs font-semibold text-gray-400">Time</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y divide-white/5">
                 {recentCheckins.map((c, i) => (
-                  <tr key={i} className="hover:bg-gray-50/50">
-                    <td className="px-4 py-2 font-medium text-gray-700">{c.name || c.email}</td>
-                    <td className="px-4 py-2 font-mono text-xs text-gray-500">{c.ticketId}</td>
-                    <td className="px-4 py-2 text-gray-500 text-xs">
+                  <tr key={i} className="hover:bg-white/5">
+                    <td className="px-4 py-2 font-medium text-gray-200">{c.name || c.email}</td>
+                    <td className="px-4 py-2 font-mono text-xs text-gray-400">{c.ticketId}</td>
+                    <td className="px-4 py-2 text-gray-400 text-xs">
                       {new Date(c.checkedInAt).toLocaleTimeString()}
                     </td>
                   </tr>

@@ -13,9 +13,9 @@ const getAuthorName = (author) => {
 };
 
 const getRoleBadge = (role) => {
-  if (role === 'Organizer') return 'bg-purple-100 text-purple-700';
-  if (role === 'Admin') return 'bg-red-100 text-red-700';
-  return 'bg-blue-100 text-blue-700';
+  if (role === 'Organizer') return 'bg-purple-500/20 text-purple-400';
+  if (role === 'Admin') return 'bg-red-500/20 text-red-400';
+  return 'bg-blue-500/20 text-blue-400';
 };
 
 const ForumDiscussion = ({ eventId, isOrganizer = false }) => {
@@ -190,7 +190,7 @@ const ForumDiscussion = ({ eventId, isOrganizer = false }) => {
   return (
     <div className="flex flex-col h-[500px]">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-3 py-2 mb-2 text-sm">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-3 py-2 mb-2 text-sm">{error}</div>
       )}
 
       {/* Messages list */}
@@ -211,18 +211,18 @@ const ForumDiscussion = ({ eventId, isOrganizer = false }) => {
                 key={msg._id}
                 className={`rounded-xl p-3 ${
                   msg.pinned
-                    ? 'bg-yellow-50 border border-yellow-200'
+                    ? 'bg-yellow-500/10 border border-yellow-500/30'
                     : msg.deleted
-                    ? 'bg-gray-50 border border-gray-100 opacity-60'
-                    : 'bg-white border border-gray-100'
+                    ? 'bg-white/5 border border-white/10 opacity-60'
+                    : 'bg-[#12122a] border border-indigo-500/20'
                 }`}
               >
                 {msg.pinned && (
-                  <div className="text-xs text-yellow-600 font-medium mb-1">📌 Pinned</div>
+                  <div className="text-xs text-yellow-400 font-medium mb-1">📌 Pinned</div>
                 )}
 
                 {msg.parentMessage && (
-                  <div className="text-xs text-gray-400 bg-gray-50 rounded px-2 py-1 mb-1 border-l-2 border-gray-300">
+                  <div className="text-xs text-gray-500 bg-white/5 rounded px-2 py-1 mb-1 border-l-2 border-gray-600">
                     Replying to: {msg.parentMessage.content?.slice(0, 60)}…
                   </div>
                 )}
@@ -230,7 +230,7 @@ const ForumDiscussion = ({ eventId, isOrganizer = false }) => {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-semibold text-sm text-gray-800">
+                      <span className="font-semibold text-sm text-gray-100">
                         {getAuthorName(msg.author)}
                       </span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${getRoleBadge(msg.authorRole)}`}>
@@ -240,7 +240,7 @@ const ForumDiscussion = ({ eventId, isOrganizer = false }) => {
                         {new Date(msg.createdAt).toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">{msg.content}</p>
+                    <p className="text-sm text-gray-300 whitespace-pre-wrap">{msg.content}</p>
                   </div>
 
                   {!msg.deleted && (
@@ -290,8 +290,8 @@ const ForumDiscussion = ({ eventId, isOrganizer = false }) => {
                           onClick={() => handleReact(msg._id, emoji)}
                           className={`text-xs px-1.5 py-0.5 rounded-full border transition ${
                             count > 0
-                              ? 'bg-indigo-50 border-indigo-200 text-indigo-600'
-                              : 'bg-gray-50 border-gray-200 text-gray-400 hover:bg-gray-100'
+                              ? 'bg-indigo-500/20 border-indigo-500/30 text-indigo-400'
+                              : 'bg-white/5 border-white/10 text-gray-500 hover:bg-white/10'
                           }`}
                         >
                           {emoji} {count > 0 && count}
@@ -309,8 +309,8 @@ const ForumDiscussion = ({ eventId, isOrganizer = false }) => {
 
       {/* Reply indicator */}
       {replyTo && (
-        <div className="bg-gray-50 rounded-lg px-3 py-2 mb-2 flex items-center justify-between text-sm">
-          <span className="text-gray-500">
+        <div className="bg-white/5 rounded-lg px-3 py-2 mb-2 flex items-center justify-between text-sm">
+          <span className="text-gray-400">
             Replying to <span className="font-medium">{getAuthorName(replyTo.author)}</span>: {replyTo.content?.slice(0, 50)}…
           </span>
           <button onClick={() => setReplyTo(null)} className="text-red-400 hover:text-red-600 ml-2">✕</button>
@@ -325,7 +325,7 @@ const ForumDiscussion = ({ eventId, isOrganizer = false }) => {
           onChange={(e) => setNewMsg(e.target.value)}
           placeholder="Type a message…"
           maxLength={2000}
-          className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="flex-1 bg-white/5 border border-gray-600 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <button
           type="submit"

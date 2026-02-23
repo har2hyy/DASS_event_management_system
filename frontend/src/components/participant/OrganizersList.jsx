@@ -35,7 +35,7 @@ const OrganizersList = () => {
   if (loading) return <LoadingSpinner text="Loading clubs…" />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50">
+    <div className="min-h-screen bg-[#0a0a14]">
     <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
       <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Clubs & Organizers</h1>
@@ -47,21 +47,21 @@ const OrganizersList = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {organizers.map((org) => (
-            <div key={org._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex flex-col">
+            <div key={org._id} className="bg-[#12122a] rounded-xl border border-indigo-500/20 p-5 flex flex-col">
               <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="font-semibold text-gray-800">{org.organizerName}</h3>
-                <span className="bg-purple-50 text-purple-600 text-xs px-2 py-0.5 rounded-full whitespace-nowrap">
+                <h3 className="font-semibold text-gray-100">{org.organizerName}</h3>
+                <span className="bg-purple-500/20 text-purple-400 text-xs px-2 py-0.5 rounded-full whitespace-nowrap">
                   {org.category}
                 </span>
               </div>
-              <p className="text-sm text-gray-500 mb-4 flex-1 line-clamp-3">{org.description || 'No description provided.'}</p>
+              <p className="text-sm text-gray-400 mb-4 flex-1 line-clamp-3">{org.description || 'No description provided.'}</p>
               {org.contactEmail && (
-                <p className="text-xs text-gray-400 mb-4">✉️ {org.contactEmail}</p>
+                <p className="text-xs text-gray-500 mb-4">✉️ {org.contactEmail}</p>
               )}
               <div className="flex gap-2">
                 <Link
                   to={`/participant/organizers/${org._id}`}
-                  className="flex-1 text-center text-sm border border-indigo-600 text-indigo-600 py-2.5 rounded-lg hover:bg-indigo-50 transition"
+                  className="flex-1 text-center text-sm border border-indigo-500/50 text-indigo-400 py-2.5 rounded-lg hover:bg-indigo-500/10 transition"
                 >
                   View
                 </Link>
@@ -69,7 +69,7 @@ const OrganizersList = () => {
                   onClick={() => toggleFollow(org._id)} disabled={busy === org._id}
                   className={`flex-1 text-sm py-2.5 rounded-lg font-medium transition ${
                     org.isFollowed
-                      ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      ? 'bg-white/10 text-gray-400 hover:bg-white/15'
                       : 'bg-indigo-600 text-white hover:bg-indigo-700'
                   }`}
                 >

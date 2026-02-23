@@ -7,21 +7,21 @@ const EventCard = ({ event, linkBase = '/participant/events' }) => {
   const isDeadlinePassed = deadline < new Date();
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
+    <div className="bg-[#12122a] rounded-xl border border-indigo-500/20 overflow-hidden hover:border-indigo-500/40 transition">
       <div className="p-5 md:p-6">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-gray-800 text-base md:text-lg leading-snug line-clamp-2">
+          <h3 className="font-semibold text-gray-100 text-base md:text-lg leading-snug line-clamp-2">
             {event.eventName}
           </h3>
           <StatusBadge status={event.status} />
         </div>
 
-        <p className="text-sm md:text-base text-indigo-600 font-medium mb-1">
+        <p className="text-sm md:text-base text-indigo-400 font-medium mb-1">
           {event.organizer?.organizerName || 'Unknown Organizer'}
         </p>
-        <p className="text-xs md:text-sm text-gray-500 mb-3 line-clamp-2">{event.eventDescription}</p>
+        <p className="text-xs md:text-sm text-gray-400 mb-3 line-clamp-2">{event.eventDescription}</p>
 
-        <div className="grid grid-cols-2 gap-1 text-xs md:text-sm text-gray-500 mb-3">
+        <div className="grid grid-cols-2 gap-1 text-xs md:text-sm text-gray-400 mb-3">
           <span>📅 {new Date(event.eventStartDate).toLocaleDateString()}</span>
           <span>🏷️ {event.eventType}</span>
           <span>👥 {event.currentRegistrations}/{event.registrationLimit}</span>
@@ -31,7 +31,7 @@ const EventCard = ({ event, linkBase = '/participant/events' }) => {
         {event.eventTags?.length > 0 && (
           <div className="flex flex-wrap gap-1 mb-3">
             {event.eventTags.slice(0, 3).map((tag) => (
-              <span key={tag} className="bg-indigo-50 text-indigo-600 text-xs px-2 py-0.5 rounded-full">
+              <span key={tag} className="bg-indigo-500/20 text-indigo-400 text-xs px-2 py-0.5 rounded-full">
                 #{tag}
               </span>
             ))}
@@ -42,7 +42,7 @@ const EventCard = ({ event, linkBase = '/participant/events' }) => {
           {isDeadlinePassed ? (
             <span className="text-xs text-red-500 font-medium">Registration Closed</span>
           ) : (
-            <span className="text-xs text-green-600 font-medium">
+            <span className="text-xs text-green-400 font-medium">
               Deadline: {deadline.toLocaleDateString()}
             </span>
           )}
