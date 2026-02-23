@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { eventAPI } from '../../services/api';
 
 const FIELD_TYPES = ['text', 'number', 'email', 'textarea', 'dropdown', 'checkbox', 'file'];
+const ALLOWED_TAGS = ['gaming', 'music', 'dance', 'sports', 'coding', 'hacking', 'robotics', 'art', 'photography', 'quizzing', 'film', 'fashion', 'literature'];
 
 const emptyField = () => ({
   label: '', type: 'text', options: [], required: false, order: 0, _tempId: Date.now(),
@@ -14,7 +15,7 @@ const CreateEvent = () => {
   const [form, setForm]   = useState({
     eventName: '', eventDescription: '', eventType: 'Normal',
     eligibility: 'All', registrationDeadline: '', eventStartDate: '', eventEndDate: '',
-    registrationLimit: 100, registrationFee: 0, eventTags: '',
+    registrationLimit: 100, registrationFee: 0, eventTags: [],
   });
   const [formFields, setFormFields] = useState([]);
   const [merch, setMerch] = useState({
@@ -47,7 +48,7 @@ const CreateEvent = () => {
         ...form,
         registrationLimit: Number(form.registrationLimit),
         registrationFee:   Number(form.registrationFee),
-        eventTags: form.eventTags.split(',').map((t) => t.trim()).filter(Boolean),
+        eventTags: form.eventTags,
       };
 
       if (form.eventType === 'Normal') {
@@ -172,14 +173,39 @@ const CreateEvent = () => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tags (comma-separated)</label>
-            <input type="text" name="eventTags" value={form.eventTags} onChange={handleForm}
-              placeholder="e.g. music, dance, competition"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+            <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+            <div className="flex flex-wrap gap-2">
+              {ALLOWED_TAGS.map((tag) => (
+                <button type="button" key={tag}
+                  onClick={() => setForm((prev) => ({
+                    ...prev,
+                    eventTags: prev.eventTags.includes(tag)
+                      ? prev.eventTags.filter((t) => t !== tag)
+                      : [...prev.eventTags, tag],
+                  }))}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition capitalize ${
+                    form.eventTags.includes(tag)
+                      ? 'bg-indigo-600 text-white border-indigo-600'
+                      : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+            {form.eventTags.length > 0 && (
+              <p className="text-xs text-gray-400 mt-1">{form.eventTags.length} tag{form.eventTags.length !== 1 ? 's' : ''} selected</p>
+            )}
           </div>
           <button onClick={() => {
               if (!form.eventName || !form.eventDescription || !form.eventStartDate || !form.eventEndDate || !form.registrationDeadline) {
                 return setError('Please fill all required fields');
+              }
+              if (form.eventEndDate < form.eventStartDate) {
+                return setError('End date must be on or after start date');
+              }
+              if (form.registrationDeadline > form.eventEndDate) {
+                return setError('Registration deadline must be on or before end date');
               }
               setError('');
               setStep(2);

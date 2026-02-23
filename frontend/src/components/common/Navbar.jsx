@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isActive = (path) =>
-    location.pathname.startsWith(path) ? 'bg-indigo-700' : 'hover:bg-indigo-700';
+    location.pathname.startsWith(path) ? 'bg-indigo-700' : 'hover:bg-indigo-700/60';
 
   const participantLinks = [
     { to: '/participant/dashboard', label: 'Dashboard' },
@@ -35,37 +36,91 @@ const Navbar = () => {
     : [];
 
   return (
-    <nav className="bg-indigo-600 text-white shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="text-2xl font-bold tracking-wide">
-          🎉 Felicity 2026
-        </Link>
+    <nav className="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
+      <div className="w-full px-6 lg:px-12">
+        <div className="flex items-center justify-between h-14">
+          {/* Left: Brand */}
+          <Link to="/" className="text-xl font-bold tracking-wide flex items-center gap-2 shrink-0">
+            🎉 <span>Felicity 2026</span>
+          </Link>
 
-        {user && (
-          <div className="flex items-center gap-1">
+          {/* Center: Nav links (desktop) */}
+          {user && (
+            <div className="hidden md:flex items-center gap-1 mx-6">
+              {links.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${isActive(link.to)}`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Right: User info + logout (desktop) */}
+          {user && (
+            <div className="hidden md:flex items-center gap-3 shrink-0">
+              <span className="text-sm text-indigo-200 font-medium">
+                {user.firstName || user.organizerName || 'Admin'}
+              </span>
+              <button
+                onClick={logout}
+                className="bg-white/90 text-indigo-600 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-white transition"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+
+          {/* Mobile hamburger */}
+          {user && (
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden p-2 rounded-lg hover:bg-indigo-700 transition"
+              aria-label="Toggle menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      {user && mobileOpen && (
+        <div className="md:hidden border-t border-indigo-500 bg-indigo-700">
+          <div className="px-4 py-3 space-y-1">
             {links.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
-                className={`px-3 py-2 rounded text-sm font-medium transition ${isActive(link.to)}`}
+                onClick={() => setMobileOpen(false)}
+                className={`block px-3 py-2 rounded-lg text-sm font-medium transition ${isActive(link.to)}`}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="ml-4 flex items-center gap-2">
+            <div className="pt-3 mt-2 border-t border-indigo-500 flex items-center justify-between">
               <span className="text-sm text-indigo-200">
                 {user.firstName || user.organizerName || 'Admin'}
               </span>
               <button
                 onClick={logout}
-                className="bg-white text-indigo-600 px-3 py-1.5 rounded text-sm font-semibold hover:bg-indigo-50 transition"
+                className="bg-white/90 text-indigo-600 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-white transition"
               >
                 Logout
               </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   );
 };

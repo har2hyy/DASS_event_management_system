@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {
-  getEvents, getTrendingEvents, getEventById,
+  getEvents, getTrendingEvents, getEventById, getAllowedTags,
   createEvent, updateEvent, publishEvent,
   deleteEvent, updateCustomForm,
 } = require('../controllers/eventController');
@@ -9,6 +9,7 @@ const { protect, authorize } = require('../middleware/auth');
 
 // Public
 router.get('/',          getEvents);
+router.get('/tags',      getAllowedTags);
 router.get('/trending',  getTrendingEvents);
 router.get('/:id',       getEventById);
 

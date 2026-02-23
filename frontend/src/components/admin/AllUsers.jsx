@@ -22,15 +22,22 @@ const AllUsers = () => {
 
   useEffect(() => { load(role); }, [role]);
 
-  const filtered = users.filter((u) =>
-    u.name?.toLowerCase().includes(search.toLowerCase()) ||
-    u.email?.toLowerCase().includes(search.toLowerCase()) ||
-    u.organizerName?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = users.filter((u) => {
+    const s = search.toLowerCase();
+    const fullName = u.role === 'Organizer' ? (u.organizerName || '') : `${u.firstName || ''} ${u.lastName || ''}`;
+    return (
+      fullName.toLowerCase().includes(s) ||
+      (u.email || '').toLowerCase().includes(s)
+    );
+  });
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">All Users</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="w-full px-6 lg:px-12 py-8">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
+        <h1 className="text-3xl font-bold">All Users</h1>
+        <p className="text-indigo-100 mt-1">Browse all participants and organizers</p>
+      </div>
 
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="flex gap-1">
@@ -64,7 +71,7 @@ const AllUsers = () => {
               ) : filtered.map((u) => (
                 <tr key={u._id} className="hover:bg-gray-50/50 transition">
                   <td className="px-4 py-3 font-medium text-gray-800">
-                    {u.role === 'Organizer' ? u.organizerName : u.name}
+                    {u.role === 'Organizer' ? u.organizerName : `${u.firstName || ''} ${u.lastName || ''}`.trim() || '—'}
                   </td>
                   <td className="px-4 py-3 text-gray-500">{u.email}</td>
                   <td className="px-4 py-3">
@@ -78,7 +85,7 @@ const AllUsers = () => {
                   </td>
                   <td className="px-4 py-3 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
-                    {u.role === 'Participant' ? u.rollNumber || '—' : u.category || '—'}
+                    {u.role === 'Participant' ? u.college || '—' : u.category || '—'}
                   </td>
                 </tr>
               ))}
@@ -86,6 +93,7 @@ const AllUsers = () => {
           </table>
         </div>
       )}
+    </div>
     </div>
   );
 };

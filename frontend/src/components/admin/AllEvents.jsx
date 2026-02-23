@@ -23,8 +23,12 @@ const AllEvents = () => {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">All Events</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="w-full px-6 lg:px-12 py-8">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
+        <h1 className="text-3xl font-bold">All Events</h1>
+        <p className="text-indigo-100 mt-1">View and monitor all events across organizers</p>
+      </div>
 
       <input type="text" value={search} placeholder="Search by event name or organizer…"
         onChange={(e) => setSearch(e.target.value)}
@@ -56,6 +60,7 @@ const AllEvents = () => {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
   );
 };

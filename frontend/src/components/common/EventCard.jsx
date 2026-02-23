@@ -48,9 +48,9 @@ const EventCard = ({ event, linkBase = '/participant/events' }) => {
           )}
           <Link
             to={`${linkBase}/${event._id}`}
-            className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition"
+            className="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium"
           >
-            View Details
+            View Details →
           </Link>
         </div>
       </div>

@@ -31,7 +31,8 @@ import OrganizerProfile   from './components/organizer/Profile';
 import AdminDashboard   from './components/admin/Dashboard';
 import ManageOrganizers from './components/admin/ManageOrganizers';
 import AllEvents        from './components/admin/AllEvents';
-import AllUsers         from './components/admin/AllUsers';
+import AllUsers              from './components/admin/AllUsers';
+import PasswordResetRequests from './components/admin/PasswordResetRequests';
 
 const RootRedirect = () => {
   const { isAuthenticated, user } = useAuth();
@@ -109,8 +110,9 @@ const App = () => {
         } />
         <Route path="/admin/users" element={
           <ProtectedRoute allowedRoles={['Admin']}><AllUsers /></ProtectedRoute>
-        } />
-
+        } />        <Route path="/admin/password-resets" element={
+          <ProtectedRoute allowedRoles={['Admin']}><PasswordResetRequests /></ProtectedRoute>
+        }/>
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

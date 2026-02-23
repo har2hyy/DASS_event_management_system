@@ -10,10 +10,9 @@ const StatusBadge = ({ status }) => {
     Published:  'bg-blue-100 text-blue-700',
     Ongoing:    'bg-green-100 text-green-700',
     Completed:  'bg-purple-100 text-purple-700',
-    Closed:     'bg-red-100 text-red-600',
+    Cancelled:  'bg-red-100 text-red-600',
     Registered: 'bg-indigo-100 text-indigo-700',
     Attended:   'bg-green-100 text-green-700',
-    Cancelled:  'bg-red-100 text-red-600',
     Rejected:   'bg-orange-100 text-orange-600',
     Pending:    'bg-yellow-100 text-yellow-700',
   };

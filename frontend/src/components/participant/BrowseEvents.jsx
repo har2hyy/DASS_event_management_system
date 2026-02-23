@@ -5,6 +5,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 
 const EVENT_TYPES = ['Normal', 'Merchandise'];
 const ELIGIBILITIES = ['IIIT Only', 'All'];
+const ALLOWED_TAGS = ['gaming', 'music', 'dance', 'sports', 'coding', 'hacking', 'robotics', 'art', 'photography', 'quizzing', 'film', 'fashion', 'literature'];
 
 const BrowseEvents = () => {
   const [events,   setEvents]   = useState([]);
@@ -16,6 +17,7 @@ const BrowseEvents = () => {
   const [startDate,   setStartDate]   = useState('');
   const [endDate,     setEndDate]     = useState('');
   const [followed,    setFollowed]    = useState(false);
+  const [tag,          setTag]         = useState('');
   const [page,   setPage] = useState(1);
   const [total,  setTotal] = useState(0);
   const debounceRef = useRef(null);
@@ -30,6 +32,7 @@ const BrowseEvents = () => {
       if (startDate)  params.startDate = startDate;
       if (endDate)    params.endDate = endDate;
       if (followed)   params.followed = 'true';
+      if (tag)        params.tag = tag;
 
       const res = await eventAPI.getAll(params);
       setEvents(res.data.events);
@@ -37,7 +40,7 @@ const BrowseEvents = () => {
       setPage(p);
     } catch (_) {}
     setLoading(false);
-  }, [search, type, eligibility, startDate, endDate, followed]);
+  }, [search, type, eligibility, startDate, endDate, followed, tag]);
 
   useEffect(() => {
     eventAPI.getTrending().then((res) => setTrending(res.data.events || [])).catch(() => {});
@@ -51,12 +54,16 @@ const BrowseEvents = () => {
 
   const clearFilters = () => {
     setSearch(''); setType(''); setEligibility('');
-    setStartDate(''); setEndDate(''); setFollowed(false);
+    setStartDate(''); setEndDate(''); setFollowed(false); setTag('');
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Browse Events</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="w-full px-6 lg:px-12 py-8">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
+        <h1 className="text-3xl font-bold">Browse Events</h1>
+        <p className="text-indigo-100 mt-1">Discover and register for Felicity 2026 events</p>
+      </div>
 
       {/* Trending strip */}
       {trending.length > 0 && (
@@ -93,6 +100,11 @@ const BrowseEvents = () => {
             className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
             <option value="">All Eligibility</option>
             {ELIGIBILITIES.map((e) => <option key={e} value={e}>{e}</option>)}
+          </select>
+          <select value={tag} onChange={(e) => setTag(e.target.value)}
+            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            <option value="">All Tags</option>
+            {ALLOWED_TAGS.map((t) => <option key={t} value={t} className="capitalize">{t}</option>)}
           </select>
         </div>
         <div className="flex flex-wrap gap-3 mt-3 items-center">
@@ -145,6 +157,7 @@ const BrowseEvents = () => {
           )}
         </>
       )}
+    </div>
     </div>
   );
 };

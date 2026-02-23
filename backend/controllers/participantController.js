@@ -114,7 +114,7 @@ exports.followOrganizer = async (req, res) => {
 exports.getOrganizerDetail = async (req, res) => {
   try {
     const organizer = await User.findById(req.params.id).select(
-      'organizerName category description contactEmail'
+      'organizerName category description contactEmail role'
     );
     if (!organizer || organizer.role !== 'Organizer') {
       return res.status(404).json({ success: false, message: 'Organizer not found' });

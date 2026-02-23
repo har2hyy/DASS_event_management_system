@@ -36,8 +36,9 @@ const registrationSchema = new mongoose.Schema(
 // Auto-generate ticket ID before first save
 registrationSchema.pre('save', function () {
   if (!this.ticketId) {
+    const crypto = require('node:crypto');
     const ts = Date.now().toString(36).toUpperCase();
-    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const rand = crypto.randomBytes(4).toString('hex').toUpperCase();
     this.ticketId = `FEL-${ts}-${rand}`;
   }
 });

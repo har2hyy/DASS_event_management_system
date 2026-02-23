@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getDashboard, createOrganizer, getOrganizers,
   deleteOrganizer, resetOrganizerPassword, getAllUsers, getAllEvents,
+  getPasswordResetRequests, approvePasswordResetRequest, rejectPasswordResetRequest,
 } = require('../controllers/adminController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -15,5 +16,10 @@ router.get('/organizers',                         ...A, getOrganizers);
 router.post('/organizers',                        ...A, createOrganizer);
 router.delete('/organizers/:id',                  ...A, deleteOrganizer);
 router.put('/organizers/:id/reset-password',      ...A, resetOrganizerPassword);
+
+// Password reset requests
+router.get('/password-reset-requests',                         ...A, getPasswordResetRequests);
+router.put('/password-reset-requests/:id/approve',             ...A, approvePasswordResetRequest);
+router.put('/password-reset-requests/:id/reject',              ...A, rejectPasswordResetRequest);
 
 module.exports = router;

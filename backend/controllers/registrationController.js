@@ -46,18 +46,14 @@ exports.registerForEvent = async (req, res) => {
 
     if (event.eventType === 'Normal') {
       regData.formResponses = req.body.formResponses || {};
-
-      // Lock form after first registration
-      if (!event.customForm?.locked) {
-        event.customForm = { ...(event.customForm || {}), locked: true };
-      }
     } else if (event.eventType === 'Merchandise') {
       const { size, color, variant, quantity = 1 } = req.body;
 
-      // Stock check
-      if (event.itemDetails.stock < quantity) {
-        return res.status(400).json({ success: false, message: 'Insufficient stock' });
+      // Validate quantity
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).json({ success: false, message: 'Quantity must be a positive integer' });
       }
+
       // Per-participant purchase limit
       if (quantity > (event.itemDetails.purchaseLimit || 1)) {
         return res.status(400).json({
@@ -66,14 +62,39 @@ exports.registerForEvent = async (req, res) => {
         });
       }
 
+      // Atomic stock check & decrement
+      const stockResult = await Event.findOneAndUpdate(
+        { _id: event._id, 'itemDetails.stock': { $gte: quantity } },
+        { $inc: { 'itemDetails.stock': -quantity, currentRegistrations: 1 } },
+        { new: true }
+      );
+      if (!stockResult) {
+        return res.status(400).json({ success: false, message: 'Insufficient stock' });
+      }
+
       regData.merchandiseDetails = { size, color, variant, quantity };
-      event.itemDetails.stock -= quantity;
+      regData.status = 'Pending'; // Pending payment approval for merchandise
     }
 
     // Save registration (ticketId auto-generated in pre-save)
     const registration = await Registration.create(regData);
-    event.currentRegistrations += 1;
-    await event.save();
+
+    // Atomic increment for Normal events (merchandise already incremented atomically)
+    if (event.eventType === 'Normal') {
+      const updateOps = { $inc: { currentRegistrations: 1 } };
+      if (!event.customForm?.locked) {
+        updateOps.$set = { 'customForm.locked': true };
+      }
+      const incResult = await Event.findOneAndUpdate(
+        { _id: event._id, currentRegistrations: { $lt: event.registrationLimit } },
+        updateOps,
+        { new: true }
+      );
+      if (!incResult) {
+        await Registration.deleteOne({ _id: registration._id });
+        return res.status(400).json({ success: false, message: 'Registration limit reached' });
+      }
+    }
 
     // Generate QR
     const qrCode = await generateQR(registration.ticketId);
@@ -156,21 +177,50 @@ exports.cancelRegistration = async (req, res) => {
     if (reg.status === 'Cancelled') {
       return res.status(400).json({ success: false, message: 'Already cancelled' });
     }
+    if (['Attended', 'Rejected'].includes(reg.status)) {
+      return res.status(400).json({ success: false, message: `Cannot cancel a registration with status '${reg.status}'` });
+    }
 
     reg.status = 'Cancelled';
     await reg.save();
 
-    // Restore slot / stock
-    const event = await Event.findById(reg.event);
-    if (event && event.currentRegistrations > 0) {
-      event.currentRegistrations -= 1;
-      if (event.eventType === 'Merchandise' && reg.merchandiseDetails?.quantity) {
-        event.itemDetails.stock += reg.merchandiseDetails.quantity;
-      }
-      await event.save();
+    // Restore slot / stock atomically
+    const incOps = { currentRegistrations: -1 };
+    if (reg.merchandiseDetails?.quantity) {
+      incOps['itemDetails.stock'] = reg.merchandiseDetails.quantity;
     }
+    await Event.findByIdAndUpdate(reg.event, { $inc: incOps });
 
     res.json({ success: true, message: 'Registration cancelled' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  PUT /api/registrations/:id/payment-proof
+// @access Private (Participant — own only)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.uploadPaymentProof = async (req, res) => {
+  try {
+    const reg = await Registration.findById(req.params.id);
+    if (!reg) return res.status(404).json({ success: false, message: 'Registration not found' });
+    if (reg.participant.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied' });
+    }
+    if (reg.status !== 'Pending') {
+      return res.status(400).json({ success: false, message: 'Payment proof can only be uploaded for pending registrations' });
+    }
+
+    const { paymentProof } = req.body;
+    if (!paymentProof) {
+      return res.status(400).json({ success: false, message: 'paymentProof (base64 or URL) is required' });
+    }
+
+    reg.paymentProof = paymentProof;
+    await reg.save();
+
+    res.json({ success: true, registration: reg });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

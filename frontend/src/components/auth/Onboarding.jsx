@@ -4,9 +4,8 @@ import { participantAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 const INTERESTS = [
-  'Music', 'Dance', 'Drama', 'Photography', 'Coding', 'Robotics',
-  'Art', 'Literature', 'Quizzing', 'Gaming', 'Sports', 'Film',
-  'Fashion', 'Food', 'Finance', 'Social Impact',
+  'Gaming', 'Music', 'Dance', 'Sports', 'Coding', 'Hacking', 'Robotics',
+  'Art', 'Photography', 'Quizzing', 'Film', 'Fashion', 'Literature',
 ];
 
 const Onboarding = () => {
@@ -25,9 +24,12 @@ const Onboarding = () => {
     try {
       const res = await participantAPI.onboarding({ interests: skip ? [] : interests });
       updateUser(res.data.user);
-    } catch (_) {}
-    setLoading(false);
-    navigate('/participant/dashboard');
+      setLoading(false);
+      navigate('/participant/dashboard');
+    } catch (_) {
+      setLoading(false);
+      navigate('/participant/dashboard');
+    }
   };
 
   return (

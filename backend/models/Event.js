@@ -28,7 +28,7 @@ const eventSchema = new mongoose.Schema(
     eventTags:            [{ type: String, trim: true }],
     status: {
       type: String,
-      enum: ['Draft', 'Published', 'Ongoing', 'Completed', 'Closed'],
+      enum: ['Draft', 'Published', 'Ongoing', 'Completed', 'Cancelled'],
       default: 'Draft',
     },
 

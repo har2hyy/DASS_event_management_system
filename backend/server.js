@@ -39,7 +39,8 @@ app.use('/api/registrations', require('./routes/registrations'));
 app.use('/api/participant',   require('./routes/participant'));
 app.use('/api/organizer',     require('./routes/organizer'));
 app.use('/api/admin',         require('./routes/admin'));
-
+app.use('/api/feedback',      require('./routes/feedback'));
+app.use('/api/forum',         require('./routes/forum'));
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/', (_req, res) => res.json({ message: 'Felicity API is running 🚀' }));
 

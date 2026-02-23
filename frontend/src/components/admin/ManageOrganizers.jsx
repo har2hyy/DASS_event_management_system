@@ -19,8 +19,12 @@ const ManageOrganizers = () => {
   const [saving,     setSaving]     = useState(false);
 
   const load = async () => {
-    const res = await adminAPI.getOrganizers();
-    setOrganizers(res.data.organizers);
+    try {
+      const res = await adminAPI.getOrganizers();
+      setOrganizers(res.data.organizers || []);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load organizers');
+    }
     setLoading(false);
   };
 
@@ -73,13 +77,19 @@ const ManageOrganizers = () => {
   if (loading) return <LoadingSpinner text="Loading organizers…" />;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Manage Organizers</h1>
-        <button onClick={() => setShowCreate(true)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-5 py-2.5 rounded-xl font-semibold transition">
-          + Create Organizer
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="w-full px-6 lg:px-12 py-8">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Manage Organizers</h1>
+            <p className="text-indigo-100 mt-1">Create and manage organizer accounts</p>
+          </div>
+          <button onClick={() => setShowCreate(true)}
+            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-10 py-4 rounded-2xl text-lg font-bold hover:from-green-500 hover:to-emerald-600 transition shadow-xl">
+            + Create Organizer
+          </button>
+        </div>
       </div>
 
       {error   && <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-4 text-sm">{error}</div>}
@@ -202,6 +212,7 @@ const ManageOrganizers = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

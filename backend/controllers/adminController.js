@@ -1,6 +1,7 @@
-const User         = require('../models/User');
-const Event        = require('../models/Event');
-const Registration = require('../models/Registration');
+const User                 = require('../models/User');
+const Event                = require('../models/Event');
+const Registration         = require('../models/Registration');
+const PasswordResetRequest = require('../models/PasswordResetRequest');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // @route  GET /api/admin/dashboard
@@ -81,6 +82,18 @@ exports.deleteOrganizer = async (req, res) => {
     if (!organizer || organizer.role !== 'Organizer') {
       return res.status(404).json({ success: false, message: 'Organizer not found' });
     }
+    // Cancel all their events and registrations
+    const events = await Event.find({ organizer: organizer._id });
+    const eventIds = events.map((e) => e._id);
+    await Registration.updateMany(
+      { event: { $in: eventIds }, status: { $in: ['Registered', 'Pending'] } },
+      { status: 'Cancelled' }
+    );
+    await Event.updateMany(
+      { organizer: organizer._id, status: { $in: ['Published', 'Ongoing'] } },
+      { status: 'Cancelled' }
+    );
+    await Event.deleteMany({ organizer: organizer._id, status: 'Draft' });
     await organizer.deleteOne();
     res.json({ success: true, message: 'Organizer deleted' });
   } catch (err) {
@@ -140,6 +153,85 @@ exports.getAllEvents = async (req, res) => {
       .populate('organizer', 'organizerName email')
       .sort({ createdAt: -1 });
     res.json({ success: true, events });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  GET /api/admin/password-reset-requests
+// @access Private (Admin)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.getPasswordResetRequests = async (req, res) => {
+  try {
+    const { status } = req.query;
+    const query = status ? { status } : {};
+    const requests = await PasswordResetRequest.find(query)
+      .populate('organizer', 'organizerName email')
+      .populate('resolvedBy', 'email')
+      .sort({ createdAt: -1 });
+    res.json({ success: true, requests });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  PUT /api/admin/password-reset-requests/:id/approve
+// @access Private (Admin)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.approvePasswordResetRequest = async (req, res) => {
+  try {
+    const { newPassword, comment } = req.body;
+    if (!newPassword) {
+      return res.status(400).json({ success: false, message: 'newPassword is required' });
+    }
+
+    const request = await PasswordResetRequest.findById(req.params.id);
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
+    if (request.status !== 'Pending') {
+      return res.status(400).json({ success: false, message: 'Request already resolved' });
+    }
+
+    // Reset organizer password
+    const organizer = await User.findById(request.organizer).select('+password');
+    if (!organizer) return res.status(404).json({ success: false, message: 'Organizer no longer exists' });
+
+    organizer.password = newPassword;
+    await organizer.save();
+
+    request.status = 'Approved';
+    request.adminComment = comment || '';
+    request.resolvedBy = req.user._id;
+    request.resolvedAt = new Date();
+    await request.save();
+
+    res.json({ success: true, message: 'Password reset approved', request });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  PUT /api/admin/password-reset-requests/:id/reject
+// @access Private (Admin)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.rejectPasswordResetRequest = async (req, res) => {
+  try {
+    const { comment } = req.body;
+    const request = await PasswordResetRequest.findById(req.params.id);
+    if (!request) return res.status(404).json({ success: false, message: 'Request not found' });
+    if (request.status !== 'Pending') {
+      return res.status(400).json({ success: false, message: 'Request already resolved' });
+    }
+
+    request.status = 'Rejected';
+    request.adminComment = comment || '';
+    request.resolvedBy = req.user._id;
+    request.resolvedAt = new Date();
+    await request.save();
+
+    res.json({ success: true, message: 'Password reset rejected', request });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

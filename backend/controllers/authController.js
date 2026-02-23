@@ -34,8 +34,8 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please provide all required fields' });
     }
 
-    if (participantType === 'IIIT' && !email.toLowerCase().endsWith('@iiit.ac.in')) {
-      return res.status(400).json({ success: false, message: 'IIIT participants must use an @iiit.ac.in email' });
+    if (participantType === 'IIIT' && !/.*@.*iiit\.ac\.in$/.test(email.toLowerCase())) {
+      return res.status(400).json({ success: false, message: 'IIIT participants must use an email ending with iiit.ac.in (e.g., @iiit.ac.in, @research.iiit.ac.in, @students.iiit.ac.in)' });
     }
 
     const existing = await User.findOne({ email: email.toLowerCase() });

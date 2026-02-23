@@ -35,8 +35,12 @@ const OrganizersList = () => {
   if (loading) return <LoadingSpinner text="Loading clubs…" />;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Clubs & Organizers</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50">
+    <div className="w-full px-6 lg:px-12 py-8">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
+        <h1 className="text-3xl font-bold">Clubs & Organizers</h1>
+        <p className="text-purple-100 mt-1">Follow your favourite clubs to get event updates</p>
+      </div>
 
       {organizers.length === 0 ? (
         <div className="text-center py-16 text-gray-400">No organizers registered yet.</div>
@@ -76,6 +80,7 @@ const OrganizersList = () => {
           ))}
         </div>
       )}
+    </div>
     </div>
   );
 };

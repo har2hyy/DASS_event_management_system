@@ -1,6 +1,11 @@
 const Event = require('../models/Event');
 const Registration = require('../models/Registration');
 
+const ALLOWED_TAGS = [
+  'gaming', 'music', 'dance', 'sports', 'coding', 'hacking',
+  'robotics', 'art', 'photography', 'quizzing', 'film', 'fashion', 'literature',
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 // @route  GET /api/events
 // @access Public (some details only after login)
@@ -10,7 +15,7 @@ exports.getEvents = async (req, res) => {
   try {
     const {
       search, type, eligibility, startDate, endDate,
-      organizer, page = 1, limit = 12, followed,
+      organizer, page = 1, limit = 12, followed, tag,
     } = req.query;
 
     const query = {};
@@ -21,6 +26,7 @@ exports.getEvents = async (req, res) => {
     if (type) query.eventType = type;
     if (eligibility) query.eligibility = eligibility;
     if (organizer) query.organizer = organizer;
+    if (tag) query.eventTags = tag.toLowerCase();
     if (startDate || endDate) {
       query.eventStartDate = {};
       if (startDate) query.eventStartDate.$gte = new Date(startDate);
@@ -59,6 +65,14 @@ exports.getEvents = async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  GET /api/events/tags
+// @access Public
+// ─────────────────────────────────────────────────────────────────────────────
+exports.getAllowedTags = (_req, res) => {
+  res.json({ success: true, tags: ALLOWED_TAGS });
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -117,6 +131,25 @@ exports.getEventById = async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 exports.createEvent = async (req, res) => {
   try {
+    const { eventStartDate, eventEndDate, registrationDeadline, eventTags } = req.body;
+
+    // Date validations
+    if (eventEndDate && eventStartDate && new Date(eventEndDate) < new Date(eventStartDate)) {
+      return res.status(400).json({ success: false, message: 'End date must be on or after start date' });
+    }
+    if (registrationDeadline && eventEndDate && new Date(registrationDeadline) > new Date(eventEndDate)) {
+      return res.status(400).json({ success: false, message: 'Registration deadline must be on or before end date' });
+    }
+
+    // Tag validation
+    if (eventTags && eventTags.length > 0) {
+      const invalid = eventTags.filter((t) => !ALLOWED_TAGS.includes(t.toLowerCase()));
+      if (invalid.length > 0) {
+        return res.status(400).json({ success: false, message: `Invalid tags: ${invalid.join(', ')}. Allowed: ${ALLOWED_TAGS.join(', ')}` });
+      }
+      req.body.eventTags = eventTags.map((t) => t.toLowerCase());
+    }
+
     const eventData = { ...req.body, organizer: req.user._id, status: 'Draft' };
     const event = await Event.create(eventData);
     res.status(201).json({ success: true, event });
@@ -141,11 +174,45 @@ exports.updateEvent = async (req, res) => {
     const { status } = event;
     const updates = req.body;
 
+    // Date validations on any update
+    const newStart = updates.eventStartDate ? new Date(updates.eventStartDate) : event.eventStartDate;
+    const newEnd   = updates.eventEndDate   ? new Date(updates.eventEndDate)   : event.eventEndDate;
+    const newDead  = updates.registrationDeadline ? new Date(updates.registrationDeadline) : event.registrationDeadline;
+    if (newEnd < newStart) {
+      return res.status(400).json({ success: false, message: 'End date must be on or after start date' });
+    }
+    if (newDead > newEnd) {
+      return res.status(400).json({ success: false, message: 'Registration deadline must be on or before end date' });
+    }
+
+    // Tag validation on any update
+    if (updates.eventTags && updates.eventTags.length > 0) {
+      const invalid = updates.eventTags.filter((t) => !ALLOWED_TAGS.includes(t.toLowerCase()));
+      if (invalid.length > 0) {
+        return res.status(400).json({ success: false, message: `Invalid tags: ${invalid.join(', ')}` });
+      }
+      updates.eventTags = updates.eventTags.map((t) => t.toLowerCase());
+    }
+
+    // Handle cancellation from any active status
+    if (updates.status === 'Cancelled') {
+      if (!['Published', 'Ongoing'].includes(status)) {
+        return res.status(400).json({ success: false, message: 'Only Published or Ongoing events can be cancelled' });
+      }
+      event.status = 'Cancelled';
+      await event.save();
+      // Cancel all active registrations
+      await Registration.updateMany(
+        { event: event._id, status: { $in: ['Registered', 'Pending'] } },
+        { status: 'Cancelled' }
+      );
+      return res.json({ success: true, event });
+    }
+
     if (status === 'Draft') {
       // Free edits
       Object.assign(event, updates);
     } else if (status === 'Published') {
-      // Description, deadline extension, limit increase, close registrations
       const allowed = ['eventDescription', 'registrationDeadline', 'registrationLimit', 'status'];
       for (const key of Object.keys(updates)) {
         if (!allowed.includes(key)) {
@@ -160,13 +227,12 @@ exports.updateEvent = async (req, res) => {
       }
       Object.assign(event, updates);
     } else if (['Ongoing', 'Completed'].includes(status)) {
-      // Status change only
       if (Object.keys(updates).filter((k) => k !== 'status').length > 0) {
         return res.status(400).json({ success: false, message: 'Only status can be changed for Ongoing/Completed events' });
       }
       if (updates.status) event.status = updates.status;
     } else {
-      return res.status(400).json({ success: false, message: 'Closed events cannot be edited' });
+      return res.status(400).json({ success: false, message: 'Cancelled events cannot be edited' });
     }
 
     await event.save();

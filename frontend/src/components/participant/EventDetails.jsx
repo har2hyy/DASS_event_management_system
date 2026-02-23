@@ -4,6 +4,8 @@ import { eventAPI, registrationAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
 import StatusBadge from '../common/StatusBadge';
+import ForumDiscussion from '../common/ForumDiscussion';
+import FeedbackSection from '../common/FeedbackSection';
 
 const EventDetails = () => {
   const { id } = useParams();
@@ -16,12 +18,30 @@ const EventDetails = () => {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [registered, setRegistered] = useState(false);
+  const [detailTab, setDetailTab] = useState('details');
+  const [myReg, setMyReg] = useState(null);
+  const [paymentProof, setPaymentProof] = useState('');
+  const [uploadingProof, setUploadingProof] = useState(false);
 
   useEffect(() => {
     eventAPI.getById(id)
       .then((res) => setEvent(res.data.event))
       .catch(() => {})
       .finally(() => setLoading(false));
+
+    // Check if already registered
+    registrationAPI.getMy()
+      .then((res) => {
+        const regs = res.data.registrations || [];
+        const existing = regs.find((r) => r.event?._id === id);
+        if (existing) {
+          setMyReg(existing);
+          if (['Registered', 'Attended', 'Pending'].includes(existing.status)) {
+            setRegistered(true);
+          }
+        }
+      })
+      .catch(() => {});
   }, [id]);
 
   if (loading) return <LoadingSpinner text="Loading event…" />;
@@ -38,9 +58,14 @@ const EventDetails = () => {
     setMessage('');
     try {
       const payload = event.eventType === 'Normal' ? { formResponses: regForm } : { ...merch };
-      await registrationAPI.register(id, payload);
+      const res = await registrationAPI.register(id, payload);
       setRegistered(true);
-      setMessage('✅ Registration successful! Check your email for the ticket.');
+      setMyReg(res.data.registration);
+      if (event.eventType === 'Merchandise') {
+        setMessage('✅ Order placed! Upload payment proof below. Organizer will approve your registration.');
+      } else {
+        setMessage('✅ Registration successful! Check your email for the ticket.');
+      }
     } catch (err) {
       setMessage(`❌ ${err.response?.data?.message || 'Registration failed'}`);
     }
@@ -48,7 +73,7 @@ const EventDetails = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="w-full max-w-5xl mx-auto px-6 lg:px-12 py-8">
       <button onClick={() => navigate(-1)} className="text-sm text-indigo-600 hover:underline mb-4 block">
         ← Back
       </button>
@@ -220,7 +245,104 @@ const EventDetails = () => {
             </button>
           </form>
         )}
+
+        {/* Payment Proof upload for pending merchandise orders */}
+        {myReg && myReg.status === 'Pending' && event.eventType === 'Merchandise' && (
+          <div className="border-t pt-6 mt-4">
+            <h2 className="text-lg font-semibold text-gray-700 mb-3">Upload Payment Proof</h2>
+            <p className="text-sm text-gray-500 mb-3">
+              Your order is pending approval. Upload a screenshot of your payment to speed up approval.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = () => setPaymentProof(reader.result);
+                  reader.readAsDataURL(file);
+                }}
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm"
+              />
+              <button
+                onClick={async () => {
+                  if (!paymentProof) return;
+                  setUploadingProof(true);
+                  try {
+                    await registrationAPI.uploadPaymentProof(myReg._id, { paymentProof });
+                    setMessage('✅ Payment proof uploaded successfully.');
+                  } catch (err) {
+                    setMessage(`❌ ${err.response?.data?.message || 'Upload failed'}`);
+                  }
+                  setUploadingProof(false);
+                }}
+                disabled={!paymentProof || uploadingProof}
+                className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-semibold transition"
+              >
+                {uploadingProof ? 'Uploading…' : 'Upload'}
+              </button>
+            </div>
+            {paymentProof && (
+              <img src={paymentProof} alt="Preview" className="mt-3 max-h-40 rounded-lg border" />
+            )}
+          </div>
+        )}
+
+        {/* Registration status badge for existing registrations */}
+        {myReg && (
+          <div className="border-t pt-4 mt-4">
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-gray-500">Your registration:</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                myReg.status === 'Registered' ? 'bg-green-100 text-green-700' :
+                myReg.status === 'Attended'   ? 'bg-blue-100 text-blue-700' :
+                myReg.status === 'Pending'    ? 'bg-yellow-100 text-yellow-700' :
+                myReg.status === 'Cancelled'  ? 'bg-gray-100 text-gray-500' :
+                'bg-red-100 text-red-700'
+              }`}>{myReg.status}</span>
+              {myReg.ticketId && <span className="font-mono text-xs text-gray-400">{myReg.ticketId}</span>}
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* ── Tabs: Discussion & Feedback ── */}
+      {['Published', 'Ongoing', 'Completed'].includes(event.status) && (
+        <div className="mt-6">
+          <div className="flex gap-1 border-b border-gray-200 mb-4">
+            {['details', 'discussion', 'feedback'].map((t) => (
+              <button
+                key={t}
+                onClick={() => setDetailTab(t)}
+                className={`px-5 py-2.5 text-sm font-medium border-b-2 transition -mb-px capitalize ${
+                  detailTab === t ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          {detailTab === 'discussion' && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">Discussion</h2>
+              <ForumDiscussion eventId={id} isOrganizer={false} />
+            </div>
+          )}
+
+          {detailTab === 'feedback' && (
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-semibold text-gray-700 mb-4">Feedback</h2>
+              <FeedbackSection
+                eventId={id}
+                canSubmit={myReg?.status === 'Attended'}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

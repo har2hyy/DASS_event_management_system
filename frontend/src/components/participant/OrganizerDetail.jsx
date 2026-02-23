@@ -24,7 +24,7 @@ const OrganizerDetail = () => {
   const { organizer, upcomingEvents, pastEvents } = data;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="w-full px-6 lg:px-12 py-8">
       <button onClick={() => navigate(-1)} className="text-sm text-indigo-600 hover:underline mb-4 block">
         ← Back
       </button>

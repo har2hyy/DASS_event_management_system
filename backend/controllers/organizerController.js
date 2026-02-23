@@ -1,7 +1,8 @@
-const User         = require('../models/User');
-const Event        = require('../models/Event');
-const Registration = require('../models/Registration');
-const { Parser }   = require('json2csv');
+const User                 = require('../models/User');
+const Event                = require('../models/Event');
+const Registration         = require('../models/Registration');
+const PasswordResetRequest = require('../models/PasswordResetRequest');
+const { Parser }           = require('json2csv');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // @route  GET /api/organizer/dashboard
@@ -143,13 +144,104 @@ exports.markAttendance = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not your event' });
     }
 
-    const reg = await Registration.findByIdAndUpdate(
-      req.params.regId,
+    const reg = await Registration.findOneAndUpdate(
+      { _id: req.params.regId, event: event._id, status: { $in: ['Registered'] } },
       { attended: true, attendanceTimestamp: new Date(), status: 'Attended' },
       { new: true }
     );
-    if (!reg) return res.status(404).json({ success: false, message: 'Registration not found' });
+    if (!reg) {
+      // Check if already attended
+      const existing = await Registration.findOne({ _id: req.params.regId, event: event._id });
+      if (existing && existing.status === 'Attended') {
+        return res.status(400).json({ success: false, message: 'Already marked as attended' });
+      }
+      return res.status(404).json({ success: false, message: 'Registration not found or not in valid state for attendance' });
+    }
     res.json({ success: true, registration: reg });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  PUT /api/organizer/events/:eventId/attendance-scan
+// @access Private (Organizer) — mark attendance by ticketId (QR scan)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.markAttendanceByScan = async (req, res) => {
+  try {
+    const { ticketId } = req.body;
+    if (!ticketId) return res.status(400).json({ success: false, message: 'ticketId is required' });
+
+    const event = await Event.findById(req.params.eventId);
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+    if (event.organizer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not your event' });
+    }
+
+    const reg = await Registration.findOne({ ticketId, event: event._id })
+      .populate('participant', 'firstName lastName email');
+    if (!reg) return res.status(404).json({ success: false, message: 'Invalid ticket for this event' });
+
+    if (reg.status === 'Attended') {
+      return res.status(400).json({
+        success: false,
+        message: 'Already checked in',
+        registration: reg,
+      });
+    }
+    if (reg.status !== 'Registered') {
+      return res.status(400).json({
+        success: false,
+        message: `Ticket status is '${reg.status}', cannot check in`,
+      });
+    }
+
+    reg.attended = true;
+    reg.attendanceTimestamp = new Date();
+    reg.status = 'Attended';
+    await reg.save();
+
+    res.json({ success: true, message: 'Check-in successful', registration: reg });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  GET /api/organizer/events/:eventId/attendance-stats
+// @access Private (Organizer) — live attendance dashboard
+// ─────────────────────────────────────────────────────────────────────────────
+exports.getAttendanceStats = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.eventId);
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+    if (event.organizer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not your event' });
+    }
+
+    const [totalRegs, attendedCount, recentCheckins] = await Promise.all([
+      Registration.countDocuments({ event: event._id, status: { $ne: 'Cancelled' } }),
+      Registration.countDocuments({ event: event._id, status: 'Attended' }),
+      Registration.find({ event: event._id, status: 'Attended' })
+        .populate('participant', 'firstName lastName email')
+        .sort({ attendanceTimestamp: -1 })
+        .limit(20),
+    ]);
+
+    res.json({
+      success: true,
+      stats: {
+        totalRegistrations: totalRegs,
+        attended: attendedCount,
+        attendanceRate: totalRegs > 0 ? Math.round((attendedCount / totalRegs) * 100) : 0,
+      },
+      recentCheckins: recentCheckins.map((r) => ({
+        ticketId: r.ticketId,
+        name: `${r.participant?.firstName || ''} ${r.participant?.lastName || ''}`.trim(),
+        email: r.participant?.email,
+        checkedInAt: r.attendanceTimestamp,
+      })),
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -183,5 +275,132 @@ exports.updateProfile = async (req, res) => {
     res.json({ success: true, user });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  POST /api/organizer/password-reset-request
+// @access Private (Organizer)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.requestPasswordReset = async (req, res) => {
+  try {
+    const { reason } = req.body;
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ success: false, message: 'Reason is required' });
+    }
+
+    // Prevent duplicate pending requests
+    const existing = await PasswordResetRequest.findOne({
+      organizer: req.user._id,
+      status: 'Pending',
+    });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'You already have a pending reset request' });
+    }
+
+    const request = await PasswordResetRequest.create({
+      organizer: req.user._id,
+      reason: reason.trim(),
+    });
+
+    res.status(201).json({ success: true, request });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  GET /api/organizer/password-reset-requests
+// @access Private (Organizer) — own requests
+// ─────────────────────────────────────────────────────────────────────────────
+exports.getMyPasswordResetRequests = async (req, res) => {
+  try {
+    const requests = await PasswordResetRequest.find({ organizer: req.user._id })
+      .sort({ createdAt: -1 });
+    res.json({ success: true, requests });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  PUT /api/organizer/events/:eventId/approve-payment/:regId
+// @access Private (Organizer)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.approvePayment = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.eventId);
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+    if (event.organizer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not your event' });
+    }
+
+    const reg = await Registration.findOne({ _id: req.params.regId, event: event._id });
+    if (!reg) return res.status(404).json({ success: false, message: 'Registration not found' });
+    if (reg.status !== 'Pending') {
+      return res.status(400).json({ success: false, message: `Cannot approve: status is '${reg.status}'` });
+    }
+
+    reg.status = 'Registered';
+    await reg.save();
+
+    // Generate QR code + send ticket email
+    const QRCode = require('qrcode');
+    const { sendTicketEmail } = require('../utils/email');
+    const qrCode = await QRCode.toDataURL(reg.ticketId, { errorCorrectionLevel: 'H', margin: 2, width: 256 }).catch(() => null);
+    if (qrCode) {
+      reg.qrCode = qrCode;
+      await reg.save();
+    }
+    const participant = await User.findById(reg.participant);
+    if (participant) {
+      const fullName = `${participant.firstName || ''} ${participant.lastName || ''}`.trim() || participant.email;
+      sendTicketEmail({
+        to: participant.email,
+        name: fullName,
+        eventName: event.eventName,
+        ticketId: reg.ticketId,
+        qrCode,
+        eventDate: event.eventStartDate,
+      });
+    }
+
+    res.json({ success: true, registration: reg });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  PUT /api/organizer/events/:eventId/reject-payment/:regId
+// @access Private (Organizer)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.rejectPayment = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.eventId);
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+    if (event.organizer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not your event' });
+    }
+
+    const reg = await Registration.findOne({ _id: req.params.regId, event: event._id });
+    if (!reg) return res.status(404).json({ success: false, message: 'Registration not found' });
+    if (reg.status !== 'Pending') {
+      return res.status(400).json({ success: false, message: `Cannot reject: status is '${reg.status}'` });
+    }
+
+    reg.status = 'Rejected';
+    await reg.save();
+
+    // Restore stock
+    if (event.eventType === 'Merchandise' && reg.merchandiseDetails?.quantity) {
+      await Event.findByIdAndUpdate(event._id, {
+        $inc: { 'itemDetails.stock': reg.merchandiseDetails.quantity, currentRegistrations: -1 },
+      });
+    }
+
+    res.json({ success: true, registration: reg });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 };

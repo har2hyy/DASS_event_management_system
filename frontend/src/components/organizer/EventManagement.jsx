@@ -3,8 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { eventAPI, organizerAPI } from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner';
 import StatusBadge from '../common/StatusBadge';
-
-const TABS = ['Overview', 'Participants', 'Analytics'];
+import ForumDiscussion from '../common/ForumDiscussion';
+import FeedbackSection from '../common/FeedbackSection';
+import QRScannerAttendance from '../common/QRScannerAttendance';
 
 const EventManagement = () => {
   const { id } = useParams();
@@ -28,16 +29,24 @@ const EventManagement = () => {
   }, [id]);
 
   const fetchParticipants = useCallback(async () => {
-    const res = await organizerAPI.getParticipants(id, { search, page, limit: 10 });
-    setParticipants(res.data.participants);
-    setTotalPages(res.data.totalPages || 1);
+    try {
+      const res = await organizerAPI.getParticipants(id, { search, page, limit: 10 });
+      setParticipants(res.data.registrations || []);
+      const total = res.data.total || 0;
+      setTotalPages(Math.max(1, Math.ceil(total / 10)));
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load participants');
+      setParticipants([]);
+    }
   }, [id, search, page]);
 
   useEffect(() => {
     (async () => {
       try {
         await fetchEvent();
-      } catch {}
+      } catch (err) {
+        setError(err.response?.data?.message || 'Failed to load event');
+      }
       setLoading(false);
     })();
   }, [fetchEvent]);
@@ -93,7 +102,9 @@ const EventManagement = () => {
     try {
       await organizerAPI.markAttendance(id, registrationId, { attended: !attended });
       fetchParticipants();
-    } catch {}
+    } catch (err) {
+      setError(err.response?.data?.message || 'Attendance update failed');
+    }
   };
 
   const handleCSV = async () => {
@@ -106,7 +117,9 @@ const EventManagement = () => {
       a.download = `${event?.eventName || 'participants'}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch {}
+    } catch (err) {
+      setError(err.response?.data?.message || 'CSV export failed');
+    }
   };
 
   if (loading) return <LoadingSpinner text="Loading event…" />;
@@ -114,9 +127,15 @@ const EventManagement = () => {
 
   const isEditable = event.status === 'Draft';
   const isLimitedEdit = event.status === 'Published';
+  const isMerchEvent = event.eventType === 'Merchandise';
+  const TABS = [
+    'Overview', 'Participants',
+    ...(isMerchEvent ? ['Payments'] : []),
+    'Attendance', 'Discussion', 'Feedback', 'Analytics',
+  ];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="w-full px-6 lg:px-12 py-8">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
@@ -143,9 +162,15 @@ const EventManagement = () => {
             </button>
           )}
           {event.status === 'Published' && (
-            <button onClick={() => handleStatusChange('Closed')} disabled={saving}
+            <button onClick={() => handleStatusChange('Cancelled')} disabled={saving}
               className="border border-red-400 text-red-500 hover:bg-red-50 text-sm px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60">
-              Close
+              Cancel Event
+            </button>
+          )}
+          {event.status === 'Ongoing' && (
+            <button onClick={() => handleStatusChange('Cancelled')} disabled={saving}
+              className="border border-red-400 text-red-500 hover:bg-red-50 text-sm px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60">
+              Cancel Event
             </button>
           )}
         </div>
@@ -255,10 +280,10 @@ const EventManagement = () => {
                   <tr><td colSpan={6} className="text-center py-10 text-gray-400">No participants found.</td></tr>
                 ) : participants.map((p) => (
                   <tr key={p._id} className="hover:bg-gray-50/50 transition">
-                    <td className="px-4 py-3 font-medium text-gray-800">{p.participant?.name || '—'}</td>
+                    <td className="px-4 py-3 font-medium text-gray-800">{p.participant ? `${p.participant.firstName} ${p.participant.lastName}` : '—'}</td>
                     <td className="px-4 py-3 text-gray-500">{p.participant?.email || '—'}</td>
                     <td className="px-4 py-3 font-mono text-xs text-gray-600">{p.ticketId}</td>
-                    <td className="px-4 py-3 text-gray-500">{new Date(p.registrationDate).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-gray-500">{new Date(p.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${p.attended ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                         {p.attended ? 'Yes' : 'No'}
@@ -297,11 +322,10 @@ const EventManagement = () => {
           ) : analytics ? (
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[
-                { label: 'Total Registrations', val: analytics.totalRegistrations },
-                { label: 'Attended',             val: analytics.attended },
-                { label: 'Attendance Rate',      val: `${analytics.attendanceRate}%` },
-                { label: 'Revenue',              val: `₹${analytics.revenue}` },
-                { label: 'Cancelled',            val: analytics.cancelled },
+                { label: 'Total Registrations', val: analytics.totalRegistrations ?? 0 },
+                { label: 'Attended',             val: analytics.attended ?? 0 },
+                { label: 'Attendance Rate',      val: analytics.totalRegistrations ? `${Math.round((analytics.attended / analytics.totalRegistrations) * 100)}%` : '0%' },
+                { label: 'Revenue',              val: `₹${analytics.revenue ?? 0}` },
               ].map((s) => (
                 <div key={s.label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
                   <p className="text-2xl font-bold text-indigo-600">{s.val}</p>
@@ -312,6 +336,144 @@ const EventManagement = () => {
           ) : (
             <p className="text-gray-400 text-center py-12">No analytics data yet.</p>
           )}
+        </div>
+      )}
+
+      {/* ── PAYMENTS (Merchandise only) ── */}
+      {tab === 'Payments' && isMerchEvent && (
+        <PaymentsTab eventId={id} onUpdate={fetchParticipants} />
+      )}
+
+      {/* ── ATTENDANCE / QR ── */}
+      {tab === 'Attendance' && (
+        <QRScannerAttendance eventId={id} />
+      )}
+
+      {/* ── DISCUSSION FORUM ── */}
+      {tab === 'Discussion' && (
+        <ForumDiscussion eventId={id} isOrganizer={true} />
+      )}
+
+      {/* ── FEEDBACK ── */}
+      {tab === 'Feedback' && (
+        <FeedbackSection eventId={id} canSubmit={false} />
+      )}
+    </div>
+  );
+};
+
+// ── Payments Sub-component ──────────────────────────────────────────────────
+const PaymentsTab = ({ eventId, onUpdate }) => {
+  const [pendingRegs, setPendingRegs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [processing, setProcessing] = useState('');
+
+  useEffect(() => {
+    fetchPending();
+  }, []);
+
+  const fetchPending = async () => {
+    try {
+      const res = await organizerAPI.getParticipants(eventId, { status: 'Pending', limit: 100 });
+      setPendingRegs(res.data.registrations || []);
+    } catch (err) {
+      setError('Failed to load pending payments');
+    }
+    setLoading(false);
+  };
+
+  const handleApprove = async (regId) => {
+    setProcessing(regId);
+    setError('');
+    try {
+      await organizerAPI.approvePayment(eventId, regId);
+      fetchPending();
+      onUpdate?.();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Approval failed');
+    }
+    setProcessing('');
+  };
+
+  const handleReject = async (regId) => {
+    if (!window.confirm('Reject this payment? Stock will be restored.')) return;
+    setProcessing(regId);
+    setError('');
+    try {
+      await organizerAPI.rejectPayment(eventId, regId);
+      fetchPending();
+      onUpdate?.();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Rejection failed');
+    }
+    setProcessing('');
+  };
+
+  if (loading) return <div className="text-center py-8 text-gray-400">Loading pending payments…</div>;
+
+  return (
+    <div>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-4 text-sm">{error}</div>
+      )}
+
+      {pendingRegs.length === 0 ? (
+        <p className="text-gray-400 text-center py-12">No pending payments to review.</p>
+      ) : (
+        <div className="space-y-3">
+          <p className="text-sm text-gray-500 mb-2">{pendingRegs.length} pending payment(s)</p>
+          {pendingRegs.map((reg) => (
+            <div key={reg._id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-medium text-gray-800">
+                    {reg.participant ? `${reg.participant.firstName} ${reg.participant.lastName}` : '—'}
+                  </p>
+                  <p className="text-sm text-gray-500">{reg.participant?.email}</p>
+                  <div className="flex gap-3 mt-1 text-xs text-gray-500">
+                    <span>Ticket: <span className="font-mono">{reg.ticketId}</span></span>
+                    {reg.merchandiseDetails && (
+                      <>
+                        {reg.merchandiseDetails.size && <span>Size: {reg.merchandiseDetails.size}</span>}
+                        {reg.merchandiseDetails.color && <span>Color: {reg.merchandiseDetails.color}</span>}
+                        <span>Qty: {reg.merchandiseDetails.quantity}</span>
+                      </>
+                    )}
+                  </div>
+                  {reg.paymentProof && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500 mb-1">Payment Proof:</p>
+                      {reg.paymentProof.startsWith('data:image') ? (
+                        <img src={reg.paymentProof} alt="Payment proof" className="max-h-40 rounded-lg border" />
+                      ) : (
+                        <a href={reg.paymentProof} target="_blank" rel="noreferrer" className="text-indigo-600 text-xs hover:underline">View proof</a>
+                      )}
+                    </div>
+                  )}
+                  {!reg.paymentProof && (
+                    <p className="text-xs text-yellow-600 mt-1">⚠ No payment proof uploaded yet</p>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleApprove(reg._id)}
+                    disabled={processing === reg._id}
+                    className="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold transition disabled:opacity-50"
+                  >
+                    {processing === reg._id ? '…' : 'Approve'}
+                  </button>
+                  <button
+                    onClick={() => handleReject(reg._id)}
+                    disabled={processing === reg._id}
+                    className="border border-red-300 text-red-500 hover:bg-red-50 text-xs px-4 py-2 rounded-lg font-semibold transition disabled:opacity-50"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

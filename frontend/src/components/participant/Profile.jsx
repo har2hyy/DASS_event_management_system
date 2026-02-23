@@ -5,9 +5,8 @@ import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const INTERESTS = [
-  'Music', 'Dance', 'Drama', 'Photography', 'Coding', 'Robotics',
-  'Art', 'Literature', 'Quizzing', 'Gaming', 'Sports', 'Film',
-  'Fashion', 'Food', 'Finance', 'Social Impact',
+  'Gaming', 'Music', 'Dance', 'Sports', 'Coding', 'Hacking', 'Robotics',
+  'Art', 'Photography', 'Quizzing', 'Film', 'Fashion', 'Literature',
 ];
 
 const ParticipantProfile = () => {

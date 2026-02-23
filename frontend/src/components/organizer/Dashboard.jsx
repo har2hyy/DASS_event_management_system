@@ -5,22 +5,38 @@ import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from '../common/LoadingSpinner';
 import StatusBadge from '../common/StatusBadge';
 
+const STAT_COLORS = {
+  indigo: 'text-indigo-600 bg-indigo-50 border-indigo-100',
+  blue:   'text-blue-600 bg-blue-50 border-blue-100',
+  green:  'text-green-600 bg-green-50 border-green-100',
+  purple: 'text-purple-600 bg-purple-50 border-purple-100',
+};
+
 const OrganizerDashboard = () => {
   const { user } = useAuth();
   const [data,    setData]    = useState({ events: [], analytics: {} });
   const [loading, setLoading] = useState(true);
+  const [error,   setError]   = useState('');
   const [filter,  setFilter]  = useState('All');
 
   useEffect(() => {
     organizerAPI.getDashboard()
       .then((res) => setData(res.data))
-      .catch(() => {})
+      .catch((err) => setError(err.response?.data?.message || 'Failed to load dashboard'))
       .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <LoadingSpinner text="Loading dashboard…" />;
+  if (error) return (
+    <div className="w-full px-6 lg:px-12 py-8">
+      <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-6 text-center">
+        <p className="font-semibold">{error}</p>
+        <button onClick={() => window.location.reload()} className="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Retry</button>
+      </div>
+    </div>
+  );
 
-  const statuses = ['All', 'Draft', 'Published', 'Ongoing', 'Completed', 'Closed'];
+  const statuses = ['All', 'Draft', 'Published', 'Ongoing', 'Completed', 'Cancelled'];
   const filtered = filter === 'All' ? data.events : data.events.filter((e) => e.status === filter);
 
   const completedEvents = data.events.filter((e) => e.status === 'Completed');
@@ -34,31 +50,33 @@ const OrganizerDashboard = () => {
   }, 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            {user.organizerName} — Dashboard
-          </h1>
-          <p className="text-gray-500 text-sm">{user.category}</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="w-full px-6 lg:px-12 py-8">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">{user.organizerName}</h1>
+            <p className="text-indigo-100 mt-1">{user.category} — Event Dashboard</p>
+          </div>
+          <Link to="/organizer/create-event"
+            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-10 py-4 rounded-2xl text-lg font-bold hover:from-green-500 hover:to-emerald-600 transition shadow-xl">
+            + Create Event
+          </Link>
         </div>
-        <Link to="/organizer/create-event"
-          className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-indigo-700 transition">
-          + Create Event
-        </Link>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total Events',   val: data.events.length,                     color: 'indigo' },
-          { label: 'Published',      val: data.events.filter((e) => e.status === 'Published').length, color: 'blue' },
-          { label: 'Total Revenue',  val: `₹${totalRevenue.toLocaleString()}`,     color: 'green' },
-          { label: 'Total Attended', val: totalAttended,                           color: 'purple' },
+          { label: 'Total Events',   val: data.events.length,                     color: 'indigo', icon: '📊' },
+          { label: 'Published',      val: data.events.filter((e) => e.status === 'Published').length, color: 'blue', icon: '🚀' },
+          { label: 'Total Revenue',  val: `₹${totalRevenue.toLocaleString()}`,     color: 'green', icon: '💰' },
+          { label: 'Total Attended', val: totalAttended,                           color: 'purple', icon: '👥' },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-            <p className={`text-2xl font-bold text-${s.color}-600`}>{s.val}</p>
-            <p className="text-sm text-gray-500">{s.label}</p>
+          <div key={s.label} className={`rounded-xl p-5 shadow-sm border ${STAT_COLORS[s.color]}`}>
+            <div className="text-2xl mb-1">{s.icon}</div>
+            <p className="text-3xl font-bold">{s.val}</p>
+            <p className="text-sm opacity-70 mt-1">{s.label}</p>
           </div>
         ))}
       </div>
@@ -102,7 +120,7 @@ const OrganizerDashboard = () => {
                   </div>
                 )}
                 <Link to={`/organizer/events/${ev._id}`}
-                  className="block text-center text-sm bg-indigo-50 text-indigo-600 py-2 rounded-lg hover:bg-indigo-100 transition font-medium">
+                  className="block text-center text-sm bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 transition font-semibold">
                   Manage →
                 </Link>
               </div>
@@ -110,6 +128,7 @@ const OrganizerDashboard = () => {
           })}
         </div>
       )}
+    </div>
     </div>
   );
 };
