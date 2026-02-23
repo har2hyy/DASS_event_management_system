@@ -21,15 +21,15 @@ const TicketView = () => {
   if (!reg) return <div className="text-center py-20 text-gray-400">Ticket not found</div>;
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-8">
-      <button onClick={() => navigate(-1)} className="text-sm text-indigo-600 hover:underline mb-4 block">
+    <div className="max-w-lg mx-auto px-4 py-8 md:py-10">
+      <button onClick={() => navigate(-1)} className="text-sm md:text-base text-indigo-600 hover:underline mb-4 block">
         ← Back
       </button>
 
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-indigo-600 mb-1">🎟️ Your Ticket</h1>
-          <p className="text-gray-500 text-sm">Felicity 2026</p>
+          <h1 className="text-xl md:text-2xl font-bold text-indigo-600 mb-1">🎫 Your Ticket</h1>
+          <p className="text-gray-500">Felicity 2026</p>
         </div>
 
         {reg.qrCode && (

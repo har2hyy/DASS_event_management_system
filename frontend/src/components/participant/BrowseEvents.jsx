@@ -59,10 +59,10 @@ const BrowseEvents = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
-    <div className="w-full px-6 lg:px-12 py-8">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
-        <h1 className="text-3xl font-bold">Browse Events</h1>
-        <p className="text-indigo-100 mt-1">Discover and register for Felicity 2026 events</p>
+    <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Browse Events</h1>
+        <p className="text-indigo-100 mt-1 md:text-lg">Discover and register for Felicity 2026 events</p>
       </div>
 
       {/* Trending strip */}
@@ -84,25 +84,25 @@ const BrowseEvents = () => {
       )}
 
       {/* Search & Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-5 mb-6">
         <div className="flex flex-col md:flex-row gap-3">
           <input
             type="text" placeholder="Search events or organizers…" value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
           <select value={type} onChange={(e) => setType(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            className="border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
             <option value="">All Types</option>
             {EVENT_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
           <select value={eligibility} onChange={(e) => setEligibility(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            className="border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
             <option value="">All Eligibility</option>
             {ELIGIBILITIES.map((e) => <option key={e} value={e}>{e}</option>)}
           </select>
           <select value={tag} onChange={(e) => setTag(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
+            className="border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400">
             <option value="">All Tags</option>
             {ALLOWED_TAGS.map((t) => <option key={t} value={t} className="capitalize">{t}</option>)}
           </select>
@@ -145,12 +145,12 @@ const BrowseEvents = () => {
           {total > 12 && (
             <div className="flex justify-center gap-2 mt-8">
               <button onClick={() => fetchEvents(page - 1)} disabled={page === 1}
-                className="px-4 py-2 border rounded-lg text-sm disabled:opacity-40 hover:bg-gray-50">
+                className="px-5 py-2.5 border rounded-lg text-sm disabled:opacity-40 hover:bg-gray-50">
                 ← Prev
               </button>
-              <span className="px-4 py-2 text-sm text-gray-500">Page {page} of {Math.ceil(total / 12)}</span>
+              <span className="px-4 py-2.5 text-sm text-gray-500">Page {page} of {Math.ceil(total / 12)}</span>
               <button onClick={() => fetchEvents(page + 1)} disabled={page >= Math.ceil(total / 12)}
-                className="px-4 py-2 border rounded-lg text-sm disabled:opacity-40 hover:bg-gray-50">
+                className="px-5 py-2.5 border rounded-lg text-sm disabled:opacity-40 hover:bg-gray-50">
                 Next →
               </button>
             </div>

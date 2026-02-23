@@ -57,13 +57,13 @@ const OrganizerProfile = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Organizer Profile</h1>
+    <div className="max-w-2xl mx-auto px-4 py-8 md:py-10">
+      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Organizer Profile</h1>
 
-      <div className="flex gap-1 border-b border-gray-200 mb-6">
+      <div className="flex gap-1 border-b border-gray-200 mb-6 overflow-x-auto">
         {['profile', 'password', 'reset request'].map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition -mb-px capitalize ${
+            className={`px-5 py-3 text-sm font-medium border-b-2 transition -mb-px capitalize whitespace-nowrap ${
               tab === t ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}>
             {t}
@@ -72,11 +72,11 @@ const OrganizerProfile = () => {
       </div>
 
       {tab === 'profile' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Login Email (read-only)</label>
             <input type="text" value={user.email} disabled
-              className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2.5 text-sm text-gray-500 cursor-not-allowed" />
+              className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm text-gray-500 cursor-not-allowed" />
           </div>
           {[
             { key: 'organizerName',  label: 'Organizer / Club Name', type: 'text' },
@@ -91,11 +91,11 @@ const OrganizerProfile = () => {
               {type === 'textarea' ? (
                 <textarea rows={3} value={info[key]}
                   onChange={(e) => setInfo({ ...info, [key]: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
               ) : (
                 <input type={type} value={info[key]}
                   onChange={(e) => setInfo({ ...info, [key]: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
               )}
             </div>
           ))}
@@ -104,14 +104,14 @@ const OrganizerProfile = () => {
           {infoErr && <p className="text-red-500 text-sm">{infoErr}</p>}
 
           <button onClick={handleInfoSave} disabled={saving}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition disabled:opacity-60">
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-60">
             {saving ? 'Saving…' : 'Save Profile'}
           </button>
         </div>
       )}
 
       {tab === 'password' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 space-y-4">
           {[
             { key: 'currentPassword', label: 'Current Password' },
             { key: 'newPassword',     label: 'New Password' },
@@ -121,7 +121,7 @@ const OrganizerProfile = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
               <input type="password" value={pwd[key]}
                 onChange={(e) => setPwd({ ...pwd, [key]: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
             </div>
           ))}
 
@@ -129,7 +129,7 @@ const OrganizerProfile = () => {
           {pwdErr && <p className="text-red-500 text-sm">{pwdErr}</p>}
 
           <button onClick={handlePwdSave} disabled={saving}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition disabled:opacity-60">
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-60">
             {saving ? 'Saving…' : 'Change Password'}
           </button>
         </div>
@@ -178,7 +178,7 @@ const PasswordResetTab = () => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 space-y-4">
         <h3 className="font-semibold text-gray-700">Request Password Reset</h3>
         <p className="text-sm text-gray-500">
           If you have forgotten your password, submit a request and an admin will reset it for you.
@@ -189,14 +189,14 @@ const PasswordResetTab = () => {
           onChange={(e) => setReason(e.target.value)}
           placeholder="Reason for password reset…"
           maxLength={500}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
         {msg && <p className="text-green-600 text-sm">{msg}</p>}
         {err && <p className="text-red-500 text-sm">{err}</p>}
         <button
           onClick={handleSubmit}
           disabled={submitting || !reason.trim()}
-          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition disabled:opacity-60"
+          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-60"
         >
           {submitting ? 'Submitting…' : 'Submit Request'}
         </button>
@@ -204,7 +204,7 @@ const PasswordResetTab = () => {
 
       {/* History */}
       {!loading && requests.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
           <h3 className="font-semibold text-gray-700 mb-3">Request History</h3>
           <div className="space-y-2">
             {requests.map((r) => (

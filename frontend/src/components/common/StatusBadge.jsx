@@ -17,7 +17,7 @@ const StatusBadge = ({ status }) => {
     Pending:    'bg-yellow-100 text-yellow-700',
   };
   return (
-    <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${colors[status] || 'bg-gray-100 text-gray-600'}`}>
+    <span className={`inline-block text-xs md:text-sm font-semibold px-2.5 py-0.5 rounded-full ${colors[status] || 'bg-gray-100 text-gray-600'}`}>
       {status}
     </span>
   );

@@ -363,6 +363,12 @@ exports.approvePayment = async (req, res) => {
         qrCode,
         eventDate: event.eventStartDate,
       });
+      // Also send payment-specific approval email
+      const { sendPaymentApprovedEmail } = require('../utils/email');
+      sendPaymentApprovedEmail({
+        to: participant.email, name: fullName,
+        eventName: event.eventName, ticketId: reg.ticketId,
+      });
     }
 
     res.json({ success: true, registration: reg });
@@ -396,6 +402,17 @@ exports.rejectPayment = async (req, res) => {
     if (event.eventType === 'Merchandise' && reg.merchandiseDetails?.quantity) {
       await Event.findByIdAndUpdate(event._id, {
         $inc: { 'itemDetails.stock': reg.merchandiseDetails.quantity, currentRegistrations: -1 },
+      });
+    }
+
+    // Send rejection email
+    const participant = await User.findById(reg.participant);
+    if (participant) {
+      const { sendPaymentRejectedEmail } = require('../utils/email');
+      const fullName = `${participant.firstName || ''} ${participant.lastName || ''}`.trim() || participant.email;
+      sendPaymentRejectedEmail({
+        to: participant.email, name: fullName,
+        eventName: event.eventName,
       });
     }
 

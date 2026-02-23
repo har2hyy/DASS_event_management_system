@@ -78,15 +78,15 @@ const ManageOrganizers = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
-    <div className="w-full px-6 lg:px-12 py-8">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
-        <div className="flex items-center justify-between">
+    <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Manage Organizers</h1>
-            <p className="text-indigo-100 mt-1">Create and manage organizer accounts</p>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Manage Organizers</h1>
+            <p className="text-indigo-100 mt-1 md:text-lg">Create and manage organizer accounts</p>
           </div>
           <button onClick={() => setShowCreate(true)}
-            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-10 py-4 rounded-2xl text-lg font-bold hover:from-green-500 hover:to-emerald-600 transition shadow-xl">
+            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-8 md:px-10 py-3 md:py-4 rounded-xl text-base md:text-lg font-bold hover:from-green-500 hover:to-emerald-600 transition shadow-xl text-center">
             + Create Organizer
           </button>
         </div>
@@ -116,11 +116,11 @@ const ManageOrganizers = () => {
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <button onClick={() => { setResetId(o._id); setNewPwd(''); }}
-                      className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition">
+                      className="text-xs border border-gray-200 rounded-lg px-4 py-2 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-300 transition">
                       Reset Pwd
                     </button>
                     <button onClick={() => setDeleteId(o._id)}
-                      className="text-xs border border-red-200 text-red-500 rounded-lg px-3 py-1.5 hover:bg-red-50 transition">
+                      className="text-xs border border-red-200 text-red-500 rounded-lg px-4 py-2 hover:bg-red-50 transition">
                       Delete
                     </button>
                   </div>
@@ -159,11 +159,11 @@ const ManageOrganizers = () => {
             </div>
             <div className="flex gap-3 mt-5">
               <button onClick={() => setShowCreate(false)}
-                className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl hover:bg-gray-50 transition">
+                className="flex-1 border border-gray-300 text-gray-600 py-3 rounded-xl hover:bg-gray-50 transition">
                 Cancel
               </button>
               <button onClick={handleCreate} disabled={saving}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition disabled:opacity-60">
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-60">
                 {saving ? 'Creating…' : 'Create'}
               </button>
             </div>
@@ -178,14 +178,14 @@ const ManageOrganizers = () => {
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Reset Password</h2>
             <input type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)}
               placeholder="New password"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4" />
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-4" />
             <div className="flex gap-3">
               <button onClick={() => setResetId(null)}
-                className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl hover:bg-gray-50 transition">
+                className="flex-1 border border-gray-300 text-gray-600 py-3 rounded-xl hover:bg-gray-50 transition">
                 Cancel
               </button>
               <button onClick={handleReset} disabled={saving || !newPwd}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition disabled:opacity-60">
+                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-60">
                 {saving ? 'Saving…' : 'Reset'}
               </button>
             </div>
@@ -201,11 +201,11 @@ const ManageOrganizers = () => {
             <p className="text-sm text-gray-500 mb-5">This action is irreversible.</p>
             <div className="flex gap-3">
               <button onClick={() => setDeleteId(null)}
-                className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl hover:bg-gray-50 transition">
+                className="flex-1 border border-gray-300 text-gray-600 py-3 rounded-xl hover:bg-gray-50 transition">
                 Cancel
               </button>
               <button onClick={handleDelete} disabled={saving}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl transition disabled:opacity-60">
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-60">
                 {saving ? 'Deleting…' : 'Delete'}
               </button>
             </div>

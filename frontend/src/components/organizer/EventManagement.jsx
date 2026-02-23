@@ -135,13 +135,13 @@ const EventManagement = () => {
   ];
 
   return (
-    <div className="w-full px-6 lg:px-12 py-8">
+    <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
         <div>
           <button onClick={() => navigate('/organizer/dashboard')}
-            className="text-sm text-gray-400 hover:text-gray-600 mb-1">← Back to Dashboard</button>
-          <h1 className="text-2xl font-bold text-gray-800">{event.eventName}</h1>
+            className="text-sm md:text-base text-gray-400 hover:text-gray-600 mb-1">← Back to Dashboard</button>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800">{event.eventName}</h1>
           <div className="flex items-center gap-3 mt-1">
             <StatusBadge status={event.status} />
             <span className="text-xs text-gray-400">{event.eventType}</span>
@@ -150,26 +150,26 @@ const EventManagement = () => {
         <div className="flex gap-2">
           {event.status === 'Draft' && (
             <button onClick={handlePublish} disabled={saving}
-              className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60">
+              className="bg-green-600 hover:bg-green-700 text-white text-sm px-5 py-2.5 rounded-lg font-semibold transition disabled:opacity-60">
               Publish
             </button>
           )}
           {(event.status === 'Published' || event.status === 'Ongoing') && (
             <button onClick={() => handleStatusChange(event.status === 'Published' ? 'Ongoing' : 'Completed')}
               disabled={saving}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60">
+              className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-5 py-2.5 rounded-lg font-semibold transition disabled:opacity-60">
               {event.status === 'Published' ? 'Mark Ongoing' : 'Mark Completed'}
             </button>
           )}
           {event.status === 'Published' && (
             <button onClick={() => handleStatusChange('Cancelled')} disabled={saving}
-              className="border border-red-400 text-red-500 hover:bg-red-50 text-sm px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60">
+              className="border border-red-400 text-red-500 hover:bg-red-50 text-sm px-5 py-2.5 rounded-lg font-semibold transition disabled:opacity-60">
               Cancel Event
             </button>
           )}
           {event.status === 'Ongoing' && (
             <button onClick={() => handleStatusChange('Cancelled')} disabled={saving}
-              className="border border-red-400 text-red-500 hover:bg-red-50 text-sm px-4 py-2 rounded-lg font-semibold transition disabled:opacity-60">
+              className="border border-red-400 text-red-500 hover:bg-red-50 text-sm px-5 py-2.5 rounded-lg font-semibold transition disabled:opacity-60">
               Cancel Event
             </button>
           )}
@@ -181,10 +181,10 @@ const EventManagement = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-200 mb-6">
+      <div className="flex gap-1 border-b border-gray-200 mb-6 overflow-x-auto">
         {TABS.map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`px-5 py-2.5 text-sm font-medium border-b-2 transition -mb-px ${
+            className={`px-5 py-3 text-sm font-medium border-b-2 transition -mb-px whitespace-nowrap ${
               tab === t ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}>
             {t}
@@ -202,15 +202,15 @@ const EventManagement = () => {
               { label: 'Eligibility',   val: event.eligibility },
               { label: 'Deadline',      val: new Date(event.registrationDeadline).toLocaleDateString() },
             ].map((s) => (
-              <div key={s.label} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                <p className="text-lg font-bold text-gray-800">{s.val}</p>
-                <p className="text-xs text-gray-500">{s.label}</p>
+              <div key={s.label} className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 shadow-sm border border-gray-100">
+                <p className="text-base md:text-lg font-bold text-gray-800">{s.val}</p>
+                <p className="text-xs md:text-sm text-gray-500">{s.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-700 mb-3">Edit Event</h3>
+          <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-gray-100">
+            <h3 className="font-semibold text-gray-700 mb-3 text-base md:text-lg">Edit Event</h3>
             {!isEditable && !isLimitedEdit ? (
               <p className="text-sm text-gray-400">Event can only be edited when Draft or Published.</p>
             ) : (
@@ -221,13 +221,13 @@ const EventManagement = () => {
                       <label className="block text-xs font-medium text-gray-500 mb-1">Event Name</label>
                       <input type="text" defaultValue={event.eventName}
                         onChange={(e) => setEditFields({ ...editFields, eventName: e.target.value })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-500 mb-1">Registration Limit</label>
                       <input type="number" defaultValue={event.registrationLimit}
                         onChange={(e) => setEditFields({ ...editFields, registrationLimit: Number(e.target.value) })}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                        className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                     </div>
                   </>
                 )}
@@ -235,16 +235,16 @@ const EventManagement = () => {
                   <label className="block text-xs font-medium text-gray-500 mb-1">Description</label>
                   <textarea rows={3} defaultValue={event.eventDescription}
                     onChange={(e) => setEditFields({ ...editFields, eventDescription: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-500 mb-1">Registration Deadline</label>
                   <input type="date" defaultValue={event.registrationDeadline?.slice(0, 10)}
                     onChange={(e) => setEditFields({ ...editFields, registrationDeadline: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
                 </div>
                 <button onClick={handleEdit} disabled={saving || Object.keys(editFields).length === 0}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-5 py-2 rounded-lg font-semibold transition disabled:opacity-50">
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm md:text-base px-6 py-2.5 rounded-lg font-semibold transition disabled:opacity-50">
                   {saving ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
@@ -259,9 +259,9 @@ const EventManagement = () => {
           <div className="flex items-center justify-between mb-4 gap-3">
             <input type="text" value={search} placeholder="Search by name or email…"
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-              className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+              className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
             <button onClick={handleCSV}
-              className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2.5 rounded-xl font-semibold transition">
+              className="bg-green-600 hover:bg-green-700 text-white text-sm px-5 py-3 rounded-xl font-semibold transition">
               Export CSV
             </button>
           </div>
@@ -305,7 +305,7 @@ const EventManagement = () => {
             <div className="flex justify-center gap-2 mt-4">
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                 <button key={p} onClick={() => setPage(p)}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${p === page ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${p === page ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                   {p}
                 </button>
               ))}
@@ -327,9 +327,9 @@ const EventManagement = () => {
                 { label: 'Attendance Rate',      val: analytics.totalRegistrations ? `${Math.round((analytics.attended / analytics.totalRegistrations) * 100)}%` : '0%' },
                 { label: 'Revenue',              val: `₹${analytics.revenue ?? 0}` },
               ].map((s) => (
-                <div key={s.label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-                  <p className="text-2xl font-bold text-indigo-600">{s.val}</p>
-                  <p className="text-sm text-gray-500">{s.label}</p>
+                <div key={s.label} className="bg-white rounded-lg md:rounded-xl p-4 md:p-5 shadow-sm border border-gray-100">
+                  <p className="text-xl md:text-2xl font-bold text-indigo-600">{s.val}</p>
+                  <p className="text-xs md:text-sm text-gray-500">{s.label}</p>
                 </div>
               ))}
             </div>
@@ -424,7 +424,7 @@ const PaymentsTab = ({ eventId, onUpdate }) => {
         <div className="space-y-3">
           <p className="text-sm text-gray-500 mb-2">{pendingRegs.length} pending payment(s)</p>
           {pendingRegs.map((reg) => (
-            <div key={reg._id} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+            <div key={reg._id} className="bg-white rounded-xl p-3 md:p-4 border border-gray-100 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="font-medium text-gray-800">
@@ -459,14 +459,14 @@ const PaymentsTab = ({ eventId, onUpdate }) => {
                   <button
                     onClick={() => handleApprove(reg._id)}
                     disabled={processing === reg._id}
-                    className="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold transition disabled:opacity-50"
+                    className="bg-green-600 hover:bg-green-700 text-white text-xs md:text-sm px-4 py-2 rounded-lg font-semibold transition disabled:opacity-50"
                   >
                     {processing === reg._id ? '…' : 'Approve'}
                   </button>
                   <button
                     onClick={() => handleReject(reg._id)}
                     disabled={processing === reg._id}
-                    className="border border-red-300 text-red-500 hover:bg-red-50 text-xs px-4 py-2 rounded-lg font-semibold transition disabled:opacity-50"
+                    className="border border-red-300 text-red-500 hover:bg-red-50 text-xs md:text-sm px-4 py-2 rounded-lg font-semibold transition disabled:opacity-50"
                   >
                     Reject
                   </button>

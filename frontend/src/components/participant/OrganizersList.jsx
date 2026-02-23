@@ -36,10 +36,10 @@ const OrganizersList = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-purple-50">
-    <div className="w-full px-6 lg:px-12 py-8">
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
-        <h1 className="text-3xl font-bold">Clubs & Organizers</h1>
-        <p className="text-purple-100 mt-1">Follow your favourite clubs to get event updates</p>
+    <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Clubs & Organizers</h1>
+        <p className="text-purple-100 mt-1 md:text-lg">Follow your favourite clubs to get event updates</p>
       </div>
 
       {organizers.length === 0 ? (
@@ -61,13 +61,13 @@ const OrganizersList = () => {
               <div className="flex gap-2">
                 <Link
                   to={`/participant/organizers/${org._id}`}
-                  className="flex-1 text-center text-sm border border-indigo-600 text-indigo-600 py-2 rounded-lg hover:bg-indigo-50 transition"
+                  className="flex-1 text-center text-sm border border-indigo-600 text-indigo-600 py-2.5 rounded-lg hover:bg-indigo-50 transition"
                 >
                   View
                 </Link>
                 <button
                   onClick={() => toggleFollow(org._id)} disabled={busy === org._id}
-                  className={`flex-1 text-sm py-2 rounded-lg font-medium transition ${
+                  className={`flex-1 text-sm py-2.5 rounded-lg font-medium transition ${
                     org.isFollowed
                       ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       : 'bg-indigo-600 text-white hover:bg-indigo-700'

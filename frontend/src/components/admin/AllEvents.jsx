@@ -24,15 +24,15 @@ const AllEvents = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
-    <div className="w-full px-6 lg:px-12 py-8">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
-        <h1 className="text-3xl font-bold">All Events</h1>
-        <p className="text-indigo-100 mt-1">View and monitor all events across organizers</p>
+    <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">All Events</h1>
+        <p className="text-indigo-100 mt-1 md:text-lg">View and monitor all events across organizers</p>
       </div>
 
       <input type="text" value={search} placeholder="Search by event name or organizer…"
         onChange={(e) => setSearch(e.target.value)}
-        className="w-full max-w-sm border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-6" />
+        className="w-full max-w-sm border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-6" />
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <table className="w-full text-sm">

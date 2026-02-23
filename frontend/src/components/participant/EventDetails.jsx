@@ -73,19 +73,19 @@ const EventDetails = () => {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-6 lg:px-12 py-8">
-      <button onClick={() => navigate(-1)} className="text-sm text-indigo-600 hover:underline mb-4 block">
+    <div className="w-full max-w-5xl mx-auto px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
+      <button onClick={() => navigate(-1)} className="text-sm md:text-base text-indigo-600 hover:underline mb-4 block">
         ← Back
       </button>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-8">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-4">
-          <h1 className="text-2xl font-bold text-gray-800">{event.eventName}</h1>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800">{event.eventName}</h1>
           <StatusBadge status={event.status} />
         </div>
 
-        <p className="text-indigo-600 font-medium mb-1">{event.organizer?.organizerName}</p>
+        <p className="text-indigo-600 font-medium mb-1 md:text-lg">{event.organizer?.organizerName}</p>
         <p className="text-gray-600 mb-6 leading-relaxed">{event.eventDescription}</p>
 
         {/* Details grid */}
@@ -240,7 +240,7 @@ const EventDetails = () => {
             )}
 
             <button type="submit" disabled={submitting}
-              className="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold py-3 rounded-xl transition">
+              className="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-semibold py-3.5 rounded-xl transition text-base">
               {submitting ? 'Processing…' : event.eventType === 'Merchandise' ? 'Purchase Now' : 'Register'}
             </button>
           </form>
@@ -279,7 +279,7 @@ const EventDetails = () => {
                   setUploadingProof(false);
                 }}
                 disabled={!paymentProof || uploadingProof}
-                className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-5 py-2 rounded-lg text-sm font-semibold transition"
+                className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition"
               >
                 {uploadingProof ? 'Uploading…' : 'Upload'}
               </button>

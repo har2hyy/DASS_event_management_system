@@ -41,18 +41,18 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
-    <div className="w-full px-6 lg:px-12 py-8">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-indigo-100 mt-1">System overview for Felicity 2026</p>
+    <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Admin Dashboard</h1>
+        <p className="text-indigo-100 mt-1 md:text-lg">System overview for Felicity 2026</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
         {cards.map((c) => (
-          <div key={c.label} className={`rounded-2xl p-6 shadow-sm border flex flex-col gap-1 ${STAT_COLORS[c.color]}`}>
+          <div key={c.label} className={`rounded-lg md:rounded-2xl p-4 md:p-6 shadow-sm border flex flex-col gap-1 ${STAT_COLORS[c.color]}`}>
             <span className="text-2xl mb-1">{c.icon}</span>
-            <p className="text-3xl font-bold">{c.val}</p>
-            <p className="text-sm opacity-70">{c.label}</p>
+            <p className="text-2xl md:text-3xl font-bold">{c.val}</p>
+            <p className="text-xs md:text-sm opacity-70">{c.label}</p>
           </div>
         ))}
       </div>
@@ -65,7 +65,7 @@ const AdminDashboard = () => {
           { href: '/admin/password-resets', label: 'Password Resets',    desc: 'Review organizer password reset requests',      icon: '🔑' },
         ].map((link) => (
           <Link key={link.href} to={link.href}
-            className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:border-indigo-300 hover:shadow-md transition block group">
+            className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 hover:border-indigo-300 hover:shadow-md transition block group">
             <span className="text-3xl block mb-3">{link.icon}</span>
             <p className="font-semibold text-gray-800 group-hover:text-indigo-600 transition">{link.label}</p>
             <p className="text-sm text-gray-400 mt-1">{link.desc}</p>

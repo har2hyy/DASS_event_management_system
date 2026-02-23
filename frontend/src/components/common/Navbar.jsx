@@ -37,10 +37,10 @@ const Navbar = () => {
 
   return (
     <nav className="bg-indigo-600 text-white shadow-lg sticky top-0 z-50">
-      <div className="w-full px-6 lg:px-12">
-        <div className="flex items-center justify-between h-14">
+      <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24">
+        <div className="flex items-center justify-between h-14 md:h-16">
           {/* Left: Brand */}
-          <Link to="/" className="text-xl font-bold tracking-wide flex items-center gap-2 shrink-0">
+          <Link to="/" className="text-lg md:text-xl font-bold tracking-wide flex items-center gap-2 shrink-0">
             🎉 <span>Felicity 2026</span>
           </Link>
 
@@ -51,7 +51,7 @@ const Navbar = () => {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${isActive(link.to)}`}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition ${isActive(link.to)}`}
                 >
                   {link.label}
                 </Link>
@@ -67,7 +67,7 @@ const Navbar = () => {
               </span>
               <button
                 onClick={logout}
-                className="bg-white/90 text-indigo-600 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-white transition"
+                className="bg-white/90 text-indigo-600 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-white transition"
               >
                 Logout
               </button>
@@ -113,7 +113,7 @@ const Navbar = () => {
               </span>
               <button
                 onClick={logout}
-                className="bg-white/90 text-indigo-600 px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-white transition"
+                className="bg-white/90 text-indigo-600 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-white transition"
               >
                 Logout
               </button>

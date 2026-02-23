@@ -52,7 +52,7 @@ const FeedbackSection = ({ eventId, canSubmit = false }) => {
     <div className="space-y-6">
       {/* Stats */}
       {stats && stats.total > 0 && (
-        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+        <div className="bg-white rounded-xl p-4 md:p-5 border border-gray-100 shadow-sm">
           <div className="flex items-center gap-6">
             <div className="text-center">
               <p className="text-4xl font-bold text-indigo-600">{stats.averageRating}</p>
@@ -87,7 +87,7 @@ const FeedbackSection = ({ eventId, canSubmit = false }) => {
 
       {/* Submit form */}
       {canSubmit && !submitted && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+        <form onSubmit={handleSubmit} className="bg-white rounded-xl p-4 md:p-5 border border-gray-100 shadow-sm">
           <h3 className="font-semibold text-gray-700 mb-3">Leave Anonymous Feedback</h3>
           <div className="flex items-center gap-1 mb-3">
             {[1, 2, 3, 4, 5].map((s) => (
@@ -116,7 +116,7 @@ const FeedbackSection = ({ eventId, canSubmit = false }) => {
             onChange={(e) => setComment(e.target.value)}
             placeholder="Share your experience (optional)…"
             maxLength={1000}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-3"
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 mb-3"
           />
           {message && (
             <p className={`text-sm mb-2 ${message.includes('Thank') ? 'text-green-600' : 'text-red-500'}`}>{message}</p>
@@ -124,7 +124,7 @@ const FeedbackSection = ({ eventId, canSubmit = false }) => {
           <button
             type="submit"
             disabled={submitting || rating === 0}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold py-2.5 px-6 rounded-xl text-sm transition"
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold py-3 px-6 rounded-xl text-sm transition"
           >
             {submitting ? 'Submitting…' : 'Submit Feedback'}
           </button>

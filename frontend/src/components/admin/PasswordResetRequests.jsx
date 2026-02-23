@@ -54,8 +54,8 @@ const PasswordResetRequests = () => {
   if (loading) return <LoadingSpinner text="Loading password reset requests…" />;
 
   return (
-    <div className="w-full px-6 lg:px-12 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Password Reset Requests</h1>
+    <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
+      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Password Reset Requests</h1>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 mb-4 text-sm">{error}</div>
@@ -67,7 +67,7 @@ const PasswordResetRequests = () => {
           <button
             key={f}
             onClick={() => { setFilter(f); setLoading(true); }}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
+            className={`px-5 py-2.5 rounded-xl text-sm font-medium transition ${
               filter === f ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
@@ -82,7 +82,7 @@ const PasswordResetRequests = () => {
           <p className="text-gray-400 text-center py-12">No password reset requests found.</p>
         ) : (
           requests.map((req) => (
-            <div key={req._id} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+            <div key={req._id} className="bg-white rounded-xl p-4 md:p-5 border border-gray-100 shadow-sm">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -110,13 +110,13 @@ const PasswordResetRequests = () => {
                     <>
                       <button
                         onClick={() => setActionModal({ request: req, action: 'approve' })}
-                        className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold transition"
+                        className="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold transition"
                       >
                         Approve
                       </button>
                       <button
                         onClick={() => setActionModal({ request: req, action: 'reject' })}
-                        className="border border-red-300 text-red-500 hover:bg-red-50 text-xs px-3 py-1.5 rounded-lg font-semibold transition"
+                        className="border border-red-300 text-red-500 hover:bg-red-50 text-xs px-4 py-2 rounded-lg font-semibold transition"
                       >
                         Reject
                       </button>
@@ -169,14 +169,14 @@ const PasswordResetRequests = () => {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => { setActionModal(null); setNewPassword(''); setComment(''); setError(''); }}
-                className="px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition"
+                className="px-5 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAction}
                 disabled={saving}
-                className={`px-5 py-2 rounded-lg text-sm font-semibold text-white transition disabled:opacity-50 ${
+                className={`px-6 py-2.5 rounded-lg text-sm font-semibold text-white transition disabled:opacity-50 ${
                   actionModal.action === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'
                 }`}
               >

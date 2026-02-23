@@ -33,24 +33,24 @@ const AllUsers = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
-    <div className="w-full px-6 lg:px-12 py-8">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
-        <h1 className="text-3xl font-bold">All Users</h1>
-        <p className="text-indigo-100 mt-1">Browse all participants and organizers</p>
+    <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">All Users</h1>
+        <p className="text-indigo-100 mt-1 md:text-lg">Browse all participants and organizers</p>
       </div>
 
       <div className="flex flex-wrap gap-3 mb-6">
         <div className="flex gap-1">
           {ROLES.map((r) => (
             <button key={r} onClick={() => setRole(r)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition ${role === r ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'}`}>
+              className={`px-5 py-2 rounded-full text-sm font-medium border transition ${role === r ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'}`}>
               {r}
             </button>
           ))}
         </div>
         <input type="text" value={search} placeholder="Search by name or email…"
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          className="flex-1 min-w-[200px] border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
       </div>
 
       {loading ? (

@@ -325,12 +325,12 @@ const ForumDiscussion = ({ eventId, isOrganizer = false }) => {
           onChange={(e) => setNewMsg(e.target.value)}
           placeholder="Type a message…"
           maxLength={2000}
-          className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
         />
         <button
           type="submit"
           disabled={sending || !newMsg.trim()}
-          className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition"
+          className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-semibold transition"
         >
           {sending ? '…' : 'Send'}
         </button>

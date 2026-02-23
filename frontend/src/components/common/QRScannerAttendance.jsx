@@ -138,16 +138,16 @@ const QRScannerAttendance = ({ eventId }) => {
       {/* Live Stats */}
       {stats && (
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
-            <p className="text-2xl font-bold text-indigo-600">{stats.totalRegistrations}</p>
-            <p className="text-xs text-gray-500">Total Registered</p>
+          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-100 shadow-sm text-center">
+            <p className="text-xl md:text-2xl font-bold text-indigo-600">{stats.totalRegistrations}</p>
+            <p className="text-xs md:text-sm text-gray-500">Total Registered</p>
           </div>
-          <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
-            <p className="text-2xl font-bold text-green-600">{stats.attended}</p>
-            <p className="text-xs text-gray-500">Checked In</p>
+          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-100 shadow-sm text-center">
+            <p className="text-xl md:text-2xl font-bold text-green-600">{stats.attended}</p>
+            <p className="text-xs md:text-sm text-gray-500">Checked In</p>
           </div>
-          <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm text-center">
-            <p className="text-2xl font-bold text-purple-600">{stats.attendanceRate}%</p>
+          <div className="bg-white rounded-lg md:rounded-xl p-3 md:p-4 border border-gray-100 shadow-sm text-center">
+            <p className="text-xl md:text-2xl font-bold text-purple-600">{stats.attendanceRate}%</p>
             <p className="text-xs text-gray-500">Attendance Rate</p>
           </div>
         </div>
@@ -157,7 +157,7 @@ const QRScannerAttendance = ({ eventId }) => {
       <div className="flex gap-2">
         <button
           onClick={() => setMode('manual')}
-          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+          className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition ${
             mode === 'manual' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -165,7 +165,7 @@ const QRScannerAttendance = ({ eventId }) => {
         </button>
         <button
           onClick={() => setMode('scanner')}
-          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
+          className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition ${
             mode === 'scanner' ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
           }`}
         >
@@ -197,12 +197,12 @@ const QRScannerAttendance = ({ eventId }) => {
             value={ticketId}
             onChange={(e) => setTicketId(e.target.value.toUpperCase())}
             placeholder="Enter ticket ID (e.g. FEL-...)"
-            className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
           <button
             type="submit"
             disabled={processing || !ticketId.trim()}
-            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition"
+            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-6 py-3 rounded-xl text-sm font-semibold transition"
           >
             {processing ? '…' : 'Check In'}
           </button>

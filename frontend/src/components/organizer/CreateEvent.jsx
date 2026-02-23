@@ -87,8 +87,8 @@ const CreateEvent = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Create New Event</h1>
+    <div className="max-w-3xl mx-auto px-4 py-8 md:py-10">
+      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Create New Event</h1>
 
       {/* Step indicators */}
       <div className="flex items-center gap-2 mb-8">
@@ -210,7 +210,7 @@ const CreateEvent = () => {
               setError('');
               setStep(2);
             }}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition">
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition">
             Next →
           </button>
         </div>
@@ -218,7 +218,7 @@ const CreateEvent = () => {
 
       {/* Step 2 — type-specific */}
       {step === 2 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 space-y-4">
           {form.eventType === 'Normal' ? (
             <>
               <div className="flex items-center justify-between mb-2">
@@ -307,10 +307,10 @@ const CreateEvent = () => {
           )}
 
           <div className="flex gap-3 pt-2">
-            <button onClick={() => setStep(1)} className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl hover:bg-gray-50 transition">
+            <button onClick={() => setStep(1)} className="flex-1 border border-gray-300 text-gray-600 py-3 rounded-xl hover:bg-gray-50 transition">
               ← Back
             </button>
-            <button onClick={() => setStep(3)} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition">
+            <button onClick={() => setStep(3)} className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition">
               Next →
             </button>
           </div>
@@ -319,8 +319,8 @@ const CreateEvent = () => {
 
       {/* Step 3 — review */}
       {step === 3 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-base font-semibold text-gray-700 mb-4">Review</h2>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
+          <h2 className="text-base md:text-lg font-semibold text-gray-700 mb-4">Review</h2>
           <div className="space-y-2 text-sm text-gray-700 mb-6">
             <p><span className="text-gray-400">Name:</span> {form.eventName}</p>
             <p><span className="text-gray-400">Type:</span> {form.eventType}</p>
@@ -334,15 +334,15 @@ const CreateEvent = () => {
             )}
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setStep(2)} className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl hover:bg-gray-50 transition">
+            <button onClick={() => setStep(2)} className="flex-1 border border-gray-300 text-gray-600 py-3 rounded-xl hover:bg-gray-50 transition">
               ← Back
             </button>
             <button onClick={() => createDraft(false)} disabled={saving}
-              className="flex-1 border border-indigo-600 text-indigo-600 py-2.5 rounded-xl hover:bg-indigo-50 transition font-semibold disabled:opacity-60">
+              className="flex-1 border border-indigo-600 text-indigo-600 py-3 rounded-xl hover:bg-indigo-50 transition font-semibold disabled:opacity-60">
               {saving ? '…' : 'Save as Draft'}
             </button>
             <button onClick={() => createDraft(true)} disabled={saving}
-              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition disabled:opacity-60">
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition disabled:opacity-60">
               {saving ? '…' : 'Publish'}
             </button>
           </div>

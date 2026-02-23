@@ -51,15 +51,15 @@ const OrganizerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
-    <div className="w-full px-6 lg:px-12 py-8">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-8 mb-8 shadow-lg">
-        <div className="flex items-center justify-between">
+    <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold">{user.organizerName}</h1>
-            <p className="text-indigo-100 mt-1">{user.category} — Event Dashboard</p>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">{user.organizerName}</h1>
+            <p className="text-indigo-100 mt-1 md:text-lg">{user.category} — Event Dashboard</p>
           </div>
           <Link to="/organizer/create-event"
-            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-10 py-4 rounded-2xl text-lg font-bold hover:from-green-500 hover:to-emerald-600 transition shadow-xl">
+            className="bg-gradient-to-r from-green-400 to-emerald-500 text-white px-8 md:px-10 py-3 md:py-4 rounded-xl text-base md:text-lg font-bold hover:from-green-500 hover:to-emerald-600 transition shadow-xl text-center">
             + Create Event
           </Link>
         </div>
@@ -73,9 +73,9 @@ const OrganizerDashboard = () => {
           { label: 'Total Revenue',  val: `₹${totalRevenue.toLocaleString()}`,     color: 'green', icon: '💰' },
           { label: 'Total Attended', val: totalAttended,                           color: 'purple', icon: '👥' },
         ].map((s) => (
-          <div key={s.label} className={`rounded-xl p-5 shadow-sm border ${STAT_COLORS[s.color]}`}>
-            <div className="text-2xl mb-1">{s.icon}</div>
-            <p className="text-3xl font-bold">{s.val}</p>
+          <div key={s.label} className={`rounded-lg md:rounded-xl p-4 md:p-5 shadow-sm border ${STAT_COLORS[s.color]}`}>
+            <div className="text-xl md:text-2xl mb-1">{s.icon}</div>
+            <p className="text-2xl md:text-3xl font-bold">{s.val}</p>
             <p className="text-sm opacity-70 mt-1">{s.label}</p>
           </div>
         ))}
@@ -97,11 +97,11 @@ const OrganizerDashboard = () => {
           <Link to="/organizer/create-event" className="text-indigo-600 hover:underline">Create one →</Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((ev) => {
             const analytics = data.analytics[ev._id.toString()] || {};
             return (
-              <div key={ev._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+              <div key={ev._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h3 className="font-semibold text-gray-800 line-clamp-2">{ev.eventName}</h3>
                   <StatusBadge status={ev.status} />
@@ -120,7 +120,7 @@ const OrganizerDashboard = () => {
                   </div>
                 )}
                 <Link to={`/organizer/events/${ev._id}`}
-                  className="block text-center text-sm bg-indigo-600 text-white py-2.5 rounded-lg hover:bg-indigo-700 transition font-semibold">
+                  className="block text-center text-sm md:text-base bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition font-semibold">
                   Manage →
                 </Link>
               </div>

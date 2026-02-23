@@ -206,6 +206,15 @@ exports.approvePasswordResetRequest = async (req, res) => {
     request.resolvedAt = new Date();
     await request.save();
 
+    // Send email notification to organizer
+    const { sendPasswordResetApprovedEmail } = require('../utils/email');
+    sendPasswordResetApprovedEmail({
+      to: organizer.email,
+      organizerName: organizer.organizerName || organizer.email,
+      tempPassword: newPassword,
+      comment: comment || '',
+    });
+
     res.json({ success: true, message: 'Password reset approved', request });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -230,6 +239,17 @@ exports.rejectPasswordResetRequest = async (req, res) => {
     request.resolvedBy = req.user._id;
     request.resolvedAt = new Date();
     await request.save();
+
+    // Send email notification to organizer
+    const organizer = await User.findById(request.organizer);
+    if (organizer) {
+      const { sendPasswordResetRejectedEmail } = require('../utils/email');
+      sendPasswordResetRejectedEmail({
+        to: organizer.email,
+        organizerName: organizer.organizerName || organizer.email,
+        comment: comment || '',
+      });
+    }
 
     res.json({ success: true, message: 'Password reset rejected', request });
   } catch (err) {

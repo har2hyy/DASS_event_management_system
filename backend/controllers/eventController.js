@@ -206,6 +206,18 @@ exports.updateEvent = async (req, res) => {
         { event: event._id, status: { $in: ['Registered', 'Pending'] } },
         { status: 'Cancelled' }
       );
+
+      // Notify registered participants via email (fire-and-forget)
+      const { sendEventStatusEmail } = require('../utils/email');
+      Registration.find({ event: event._id }).populate('participant', 'firstName lastName email').then((regs) => {
+        for (const r of regs) {
+          if (r.participant?.email) {
+            const name = `${r.participant.firstName || ''} ${r.participant.lastName || ''}`.trim() || r.participant.email;
+            sendEventStatusEmail({ to: r.participant.email, name, eventName: event.eventName, newStatus: 'Cancelled' });
+          }
+        }
+      }).catch(() => {});
+
       return res.json({ success: true, event });
     }
 
