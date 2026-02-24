@@ -38,7 +38,14 @@ const userSchema = new mongoose.Schema(
       required: function () { return this.role === 'Participant'; },
     },
     college: { type: String, trim: true },
-    contactNumber: { type: String, trim: true },
+    contactNumber: {
+      type: String,
+      trim: true,
+      validate: {
+        validator: (v) => !v || /^[0-9]{10}$/.test(v),
+        message: 'Contact number must be a valid 10-digit mobile number',
+      },
+    },
     interests: [{ type: String, trim: true }],
     followedOrganizers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     onboardingDone: { type: Boolean, default: false },
@@ -57,6 +64,9 @@ const userSchema = new mongoose.Schema(
     description: { type: String, default: '' },
     contactEmail: { type: String, trim: true, lowercase: true },
     discordWebhook: { type: String, default: '' },
+
+    // ── Archive (soft-disable) ──────────────────────────────────────────────
+    isArchived: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

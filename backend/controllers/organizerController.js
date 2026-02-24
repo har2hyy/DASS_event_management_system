@@ -63,11 +63,13 @@ exports.getEventParticipants = async (req, res) => {
     const query = { event: event._id };
     if (status) query.status = status;
 
+    // When searching, fetch all records then filter (search crosses page boundaries)
+    const isSearching = !!search;
     let registrations = await Registration.find(query)
       .populate('participant', 'firstName lastName email participantType college contactNumber')
       .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(Number(limit));
+      .skip(isSearching ? 0 : (page - 1) * limit)
+      .limit(isSearching ? 0 : Number(limit));
 
     if (search) {
       const s = search.toLowerCase();
@@ -144,9 +146,17 @@ exports.markAttendance = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not your event' });
     }
 
+    const { reason } = req.body || {};
     const reg = await Registration.findOneAndUpdate(
       { _id: req.params.regId, event: event._id, status: { $in: ['Registered'] } },
-      { attended: true, attendanceTimestamp: new Date(), status: 'Attended' },
+      {
+        attended: true,
+        attendanceTimestamp: new Date(),
+        status: 'Attended',
+        attendanceMethod: 'manual',
+        attendanceMarkedBy: req.user._id,
+        overrideReason: reason || '',
+      },
       { new: true }
     );
     if (!reg) {
@@ -199,6 +209,8 @@ exports.markAttendanceByScan = async (req, res) => {
     reg.attended = true;
     reg.attendanceTimestamp = new Date();
     reg.status = 'Attended';
+    reg.attendanceMethod = 'scan';
+    reg.attendanceMarkedBy = req.user._id;
     await reg.save();
 
     res.json({ success: true, message: 'Check-in successful', registration: reg });
@@ -219,11 +231,18 @@ exports.getAttendanceStats = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not your event' });
     }
 
-    const [totalRegs, attendedCount, recentCheckins] = await Promise.all([
-      Registration.countDocuments({ event: event._id, status: { $ne: 'Cancelled' } }),
+    const [totalRegs, attendedCount, checkedInList, notScannedList, recentCheckins] = await Promise.all([
+      Registration.countDocuments({ event: event._id, status: { $in: ['Registered', 'Attended'] } }),
       Registration.countDocuments({ event: event._id, status: 'Attended' }),
       Registration.find({ event: event._id, status: 'Attended' })
         .populate('participant', 'firstName lastName email')
+        .sort({ attendanceTimestamp: -1 }),
+      Registration.find({ event: event._id, status: 'Registered' })
+        .populate('participant', 'firstName lastName email')
+        .sort({ createdAt: -1 }),
+      Registration.find({ event: event._id, status: 'Attended' })
+        .populate('participant', 'firstName lastName email')
+        .populate('attendanceMarkedBy', 'email organizerName')
         .sort({ attendanceTimestamp: -1 })
         .limit(20),
     ]);
@@ -235,11 +254,30 @@ exports.getAttendanceStats = async (req, res) => {
         attended: attendedCount,
         attendanceRate: totalRegs > 0 ? Math.round((attendedCount / totalRegs) * 100) : 0,
       },
+      checkedIn: checkedInList.map((r) => ({
+        _id: r._id,
+        ticketId: r.ticketId,
+        name: `${r.participant?.firstName || ''} ${r.participant?.lastName || ''}`.trim(),
+        email: r.participant?.email,
+        checkedInAt: r.attendanceTimestamp,
+        method: r.attendanceMethod || 'unknown',
+        overrideReason: r.overrideReason || '',
+      })),
+      notScanned: notScannedList.map((r) => ({
+        _id: r._id,
+        ticketId: r.ticketId,
+        name: `${r.participant?.firstName || ''} ${r.participant?.lastName || ''}`.trim(),
+        email: r.participant?.email,
+        registeredAt: r.createdAt,
+      })),
       recentCheckins: recentCheckins.map((r) => ({
         ticketId: r.ticketId,
         name: `${r.participant?.firstName || ''} ${r.participant?.lastName || ''}`.trim(),
         email: r.participant?.email,
         checkedInAt: r.attendanceTimestamp,
+        method: r.attendanceMethod || 'unknown',
+        markedBy: r.attendanceMarkedBy?.email || r.attendanceMarkedBy?.organizerName || '',
+        overrideReason: r.overrideReason || '',
       })),
     });
   } catch (err) {
@@ -344,6 +382,18 @@ exports.approvePayment = async (req, res) => {
     reg.status = 'Registered';
     await reg.save();
 
+    // Generate ticket ID (was skipped during Pending registration)
+    if (!reg.ticketId) {
+      const crypto = require('node:crypto');
+      const ts = Date.now().toString(36).toUpperCase();
+      const rand = crypto.randomBytes(4).toString('hex').toUpperCase();
+      reg.ticketId = `FEL-${ts}-${rand}`;
+      await reg.save();
+    }
+
+    // Increment currentRegistrations now that payment is approved
+    await Event.findByIdAndUpdate(event._id, { $inc: { currentRegistrations: 1 } });
+
     // Generate QR code + send ticket email
     const QRCode = require('qrcode');
     const { sendTicketEmail } = require('../utils/email');
@@ -362,12 +412,6 @@ exports.approvePayment = async (req, res) => {
         ticketId: reg.ticketId,
         qrCode,
         eventDate: event.eventStartDate,
-      });
-      // Also send payment-specific approval email
-      const { sendPaymentApprovedEmail } = require('../utils/email');
-      sendPaymentApprovedEmail({
-        to: participant.email, name: fullName,
-        eventName: event.eventName, ticketId: reg.ticketId,
       });
     }
 
@@ -398,10 +442,10 @@ exports.rejectPayment = async (req, res) => {
     reg.status = 'Rejected';
     await reg.save();
 
-    // Restore stock
+    // Restore stock only (currentRegistrations was never incremented for Pending)
     if (event.eventType === 'Merchandise' && reg.merchandiseDetails?.quantity) {
       await Event.findByIdAndUpdate(event._id, {
-        $inc: { 'itemDetails.stock': reg.merchandiseDetails.quantity, currentRegistrations: -1 },
+        $inc: { 'itemDetails.stock': reg.merchandiseDetails.quantity },
       });
     }
 

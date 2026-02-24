@@ -5,7 +5,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import StatusBadge from '../common/StatusBadge';
 import { Link } from 'react-router-dom';
 
-const TABS = ['Upcoming', 'Normal', 'Merchandise', 'Completed', 'Cancelled'];
+const TABS = ['Upcoming', 'All', 'Normal', 'Merchandise', 'Completed', 'Cancelled'];
 
 const STAT_COLORS = {
   indigo: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30',
@@ -30,8 +30,9 @@ const ParticipantDashboard = () => {
 
   const list = useMemo(() => {
     if (tab === 'Upcoming') return data.upcoming;
+    if (tab === 'All') return [...data.upcoming, ...data.history];
     if (tab === 'Cancelled') return data.history.filter((r) => ['Cancelled', 'Rejected'].includes(r.status));
-    if (tab === 'Completed') return data.history.filter((r) => r.event?.status === 'Completed');
+    if (tab === 'Completed') return data.history.filter((r) => r.event?.status === 'Completed' || r.status === 'Attended');
     if (tab === 'Normal') return data.history.filter((r) => r.event?.eventType === 'Normal' && !['Cancelled', 'Rejected'].includes(r.status));
     if (tab === 'Merchandise') return data.history.filter((r) => r.event?.eventType === 'Merchandise' && !['Cancelled', 'Rejected'].includes(r.status));
     return [];

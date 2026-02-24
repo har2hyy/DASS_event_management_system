@@ -82,20 +82,95 @@ exports.deleteOrganizer = async (req, res) => {
     if (!organizer || organizer.role !== 'Organizer') {
       return res.status(404).json({ success: false, message: 'Organizer not found' });
     }
-    // Cancel all their events and registrations
+
+    // ── Full cascade delete: remove ALL data related to this organizer ──
+
+    // 1. Get all events owned by this organizer
     const events = await Event.find({ organizer: organizer._id });
     const eventIds = events.map((e) => e._id);
-    await Registration.updateMany(
-      { event: { $in: eventIds }, status: { $in: ['Registered', 'Pending'] } },
-      { status: 'Cancelled' }
+
+    // 2. For each registration under those events, restore event counters / merch stock
+    if (eventIds.length > 0) {
+      const regs = await Registration.find({ event: { $in: eventIds } });
+      for (const reg of regs) {
+        const incOps = {};
+        if (['Registered', 'Attended'].includes(reg.status)) {
+          incOps.currentRegistrations = -1;
+        }
+        if (reg.merchandiseDetails?.quantity && ['Registered', 'Attended', 'Pending'].includes(reg.status)) {
+          incOps['itemDetails.stock'] = reg.merchandiseDetails.quantity;
+        }
+        // Counter restore only matters for cross-organizer events (edge case), safe to skip
+      }
+
+      // 3. Delete ALL registrations for all their events
+      await Registration.deleteMany({ event: { $in: eventIds } });
+
+      // 4. Delete messages & feedback for all their events
+      try { const Message  = require('../models/Message');  await Message.deleteMany({ event: { $in: eventIds } }); } catch (_) {}
+      try { const Feedback = require('../models/Feedback'); await Feedback.deleteMany({ event: { $in: eventIds } }); } catch (_) {}
+    }
+
+    // 5. Delete ALL events (all statuses)
+    await Event.deleteMany({ organizer: organizer._id });
+
+    // 6. Delete password reset requests for this organizer
+    await PasswordResetRequest.deleteMany({ organizer: organizer._id });
+
+    // 7. Remove this organizer from all users' followedOrganizers
+    await User.updateMany(
+      { followedOrganizers: organizer._id },
+      { $pull: { followedOrganizers: organizer._id } }
     );
-    await Event.updateMany(
-      { organizer: organizer._id, status: { $in: ['Published', 'Ongoing'] } },
-      { status: 'Cancelled' }
-    );
-    await Event.deleteMany({ organizer: organizer._id, status: 'Draft' });
+
+    // 8. Delete the organizer user document
     await organizer.deleteOne();
-    res.json({ success: true, message: 'Organizer deleted' });
+
+    res.json({ success: true, message: 'Organizer and all associated data permanently deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  PUT /api/admin/organizers/:id/archive
+// @access Private (Admin)
+// Temporarily disables the organizer account (cannot log in).
+// ─────────────────────────────────────────────────────────────────────────────
+exports.archiveOrganizer = async (req, res) => {
+  try {
+    const organizer = await User.findById(req.params.id);
+    if (!organizer || organizer.role !== 'Organizer') {
+      return res.status(404).json({ success: false, message: 'Organizer not found' });
+    }
+    if (organizer.isArchived) {
+      return res.status(400).json({ success: false, message: 'Organizer is already archived' });
+    }
+    organizer.isArchived = true;
+    await organizer.save({ validateModifiedOnly: true });
+    res.json({ success: true, message: 'Organizer archived — they can no longer log in', organizer: { _id: organizer._id, isArchived: true } });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// @route  PUT /api/admin/organizers/:id/unarchive
+// @access Private (Admin)
+// Re-enables a previously archived organizer account.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.unarchiveOrganizer = async (req, res) => {
+  try {
+    const organizer = await User.findById(req.params.id);
+    if (!organizer || organizer.role !== 'Organizer') {
+      return res.status(404).json({ success: false, message: 'Organizer not found' });
+    }
+    if (!organizer.isArchived) {
+      return res.status(400).json({ success: false, message: 'Organizer is not archived' });
+    }
+    organizer.isArchived = false;
+    await organizer.save({ validateModifiedOnly: true });
+    res.json({ success: true, message: 'Organizer unarchived — they can log in again', organizer: { _id: organizer._id, isArchived: false } });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -116,7 +191,7 @@ exports.resetOrganizerPassword = async (req, res) => {
     }
 
     organizer.password = newPassword;
-    await organizer.save();
+    await organizer.save({ validateModifiedOnly: true });
     res.json({ success: true, message: 'Password reset successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -180,6 +255,64 @@ exports.deleteEvent = async (req, res) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// @route  DELETE /api/admin/users/:id
+// @access Private (Admin) — removes a Participant and cascades
+// ─────────────────────────────────────────────────────────────────────────────
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    if (['Admin', 'Organizer'].includes(user.role)) {
+      return res.status(400).json({ success: false, message: `Cannot delete ${user.role} accounts from here` });
+    }
+
+    // ── 1. Cascade registrations ──────────────────────────────────────────
+    const regs = await Registration.find({ participant: user._id });
+
+    for (const reg of regs) {
+      const incOps = {};
+
+      // Decrement currentRegistrations for statuses that were counted
+      if (['Registered', 'Attended'].includes(reg.status)) {
+        incOps.currentRegistrations = -1;
+      }
+
+      // Restore merch stock for orders that reserved stock
+      if (reg.merchandiseDetails?.quantity && ['Registered', 'Attended', 'Pending'].includes(reg.status)) {
+        incOps['itemDetails.stock'] = reg.merchandiseDetails.quantity;
+      }
+
+      if (Object.keys(incOps).length > 0) {
+        await Event.findByIdAndUpdate(reg.event, { $inc: incOps });
+      }
+    }
+
+    // Delete all registrations
+    await Registration.deleteMany({ participant: user._id });
+
+    // ── 2. Cascade messages ───────────────────────────────────────────────
+    try {
+      const Message = require('../models/Message');
+      await Message.deleteMany({ author: user._id });
+    } catch (_) {}
+
+    // ── 3. Remove from other users' followedOrganizers (safety) ───────────
+    await User.updateMany(
+      { followedOrganizers: user._id },
+      { $pull: { followedOrganizers: user._id } }
+    );
+
+    // ── 4. Delete the user ────────────────────────────────────────────────
+    await user.deleteOne();
+
+    res.json({ success: true, message: 'User and all associated data deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // @route  GET /api/admin/password-reset-requests
 // @access Private (Admin)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -219,7 +352,7 @@ exports.approvePasswordResetRequest = async (req, res) => {
     if (!organizer) return res.status(404).json({ success: false, message: 'Organizer no longer exists' });
 
     organizer.password = newPassword;
-    await organizer.save();
+    await organizer.save({ validateModifiedOnly: true });
 
     request.status = 'Approved';
     request.adminComment = comment || '';

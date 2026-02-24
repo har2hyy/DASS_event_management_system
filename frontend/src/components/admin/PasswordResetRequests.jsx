@@ -51,6 +51,13 @@ const PasswordResetRequests = () => {
     setSaving(false);
   };
 
+  const generatePassword = () => {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+    let pwd = '';
+    for (let i = 0; i < 12; i++) pwd += chars[Math.floor(Math.random() * chars.length)];
+    setNewPassword(pwd);
+  };
+
   if (loading) return <LoadingSpinner text="Loading password reset requests…" />;
 
   return (
@@ -143,13 +150,22 @@ const PasswordResetRequests = () => {
             {actionModal.action === 'approve' && (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-1">New Password *</label>
-                <input
-                  type="text"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter temporary password"
-                  className="w-full bg-white/5 border border-gray-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter temporary password"
+                    className="flex-1 bg-white/5 border border-gray-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={generatePassword}
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2.5 rounded-lg font-semibold transition whitespace-nowrap"
+                  >
+                    Generate
+                  </button>
+                </div>
               </div>
             )}
 

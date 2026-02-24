@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { eventAPI } from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 import EventCard from '../common/EventCard';
 import LoadingSpinner from '../common/LoadingSpinner';
 
@@ -8,6 +9,7 @@ const ELIGIBILITIES = ['IIIT Only', 'All'];
 const ALLOWED_TAGS = ['gaming', 'music', 'dance', 'sports', 'coding', 'hacking', 'robotics', 'art', 'photography', 'quizzing', 'film', 'fashion', 'literature'];
 
 const BrowseEvents = () => {
+  const { user } = useAuth();
   const [events,   setEvents]   = useState([]);
   const [trending, setTrending] = useState([]);
   const [loading,  setLoading]  = useState(true);
@@ -35,7 +37,17 @@ const BrowseEvents = () => {
       if (tag)        params.tag = tag;
 
       const res = await eventAPI.getAll(params);
-      setEvents(res.data.events);
+      // Boost events matching user's interest tags to the top
+      let fetched = res.data.events || [];
+      const interests = user?.interests || [];
+      if (interests.length > 0) {
+        fetched = [...fetched].sort((a, b) => {
+          const aMatch = (a.eventTags || []).filter(t => interests.includes(t)).length;
+          const bMatch = (b.eventTags || []).filter(t => interests.includes(t)).length;
+          return bMatch - aMatch; // more matches first
+        });
+      }
+      setEvents(fetched);
       setTotal(res.data.total);
       setPage(p);
     } catch (_) {}

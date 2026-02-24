@@ -37,6 +37,7 @@ const EventDetails = () => {
     setSubmitting(false);
   };
   const [detailTab, setDetailTab] = useState('details');
+  const [forumUnread, setForumUnread] = useState(0);
   const [myReg, setMyReg] = useState(null);
   const [paymentProof, setPaymentProof] = useState('');
   const [uploadingProof, setUploadingProof] = useState(false);
@@ -211,6 +212,21 @@ const EventDetails = () => {
                         </label>
                       ))}
                     </div>
+                  ) : field.type === 'file' ? (
+                    <div>
+                      <input type="file" accept="image/*,.pdf,.doc,.docx,.txt"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = () => setRegForm({ ...regForm, [field.label]: reader.result });
+                          reader.readAsDataURL(file);
+                        }}
+                        className="w-full bg-white/5 border border-gray-600 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                      {regForm[field.label] && (
+                        <p className="text-xs text-green-400 mt-1">✓ File attached</p>
+                      )}
+                    </div>
                   ) : null}
                 </div>
               ))
@@ -266,12 +282,19 @@ const EventDetails = () => {
           </form>
         )}
 
-        {/* Payment Proof upload for pending merchandise orders */}
-        {myReg && myReg.status === 'Pending' && event.eventType === 'Merchandise' && (
+        {/* Payment Proof upload for pending/rejected merchandise orders */}
+        {myReg && ['Pending', 'Rejected'].includes(myReg.status) && event.eventType === 'Merchandise' && (
           <div className="border-t border-white/10 pt-6 mt-4">
-            <h2 className="text-lg font-semibold text-gray-200 mb-3">Upload Payment Proof</h2>
+            <h2 className="text-lg font-semibold text-gray-200 mb-3">
+              {myReg.status === 'Rejected' ? 'Payment Rejected — Upload New Proof' : 'Upload Payment Proof'}
+            </h2>
+            {myReg.status === 'Rejected' && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-4 py-3 mb-3 text-sm">
+                Your previous payment was rejected. Please upload a new payment proof to try again.
+              </div>
+            )}
             <p className="text-sm text-gray-400 mb-3">
-              Your order is pending approval. Upload a screenshot of your payment to speed up approval.
+              Upload a screenshot of your payment for organizer approval.
             </p>
             <div className="flex gap-2">
               <input
@@ -292,7 +315,12 @@ const EventDetails = () => {
                   setUploadingProof(true);
                   try {
                     await registrationAPI.uploadPaymentProof(myReg._id, { paymentProof });
-                    setMessage('✅ Payment proof uploaded successfully.');
+                    setMessage('✅ Payment proof uploaded successfully. Awaiting organizer approval.');
+                    // Refresh registration status
+                    const regRes = await registrationAPI.getMy();
+                    const regs = regRes.data.registrations || [];
+                    const updated = regs.find((r) => r.event?._id === id);
+                    if (updated) setMyReg(updated);
                   } catch (err) {
                     setMessage(`❌ ${err.response?.data?.message || 'Upload failed'}`);
                   }
@@ -301,12 +329,70 @@ const EventDetails = () => {
                 disabled={!paymentProof || uploadingProof}
                 className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition"
               >
-                {uploadingProof ? 'Uploading…' : 'Upload'}
+                {uploadingProof ? 'Uploading…' : myReg.status === 'Rejected' ? 'Retry Payment' : 'Upload'}
               </button>
             </div>
             {paymentProof && (
               <img src={paymentProof} alt="Preview" className="mt-3 max-h-40 rounded-lg border" />
             )}
+          </div>
+        )}
+
+        {/* Filled merchandise details + payment proof for existing merchandise registrations */}
+        {myReg && event.eventType === 'Merchandise' && myReg.merchandiseDetails && (
+          <div className="border-t border-white/10 pt-6 mt-4">
+            <h2 className="text-lg font-semibold text-gray-200 mb-3">Your Order Details</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm mb-4">
+              {myReg.merchandiseDetails.size && (
+                <div className="bg-white/5 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 uppercase">Size</p>
+                  <p className="font-semibold text-gray-200 mt-0.5">{myReg.merchandiseDetails.size}</p>
+                </div>
+              )}
+              {myReg.merchandiseDetails.color && (
+                <div className="bg-white/5 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 uppercase">Color</p>
+                  <p className="font-semibold text-gray-200 mt-0.5">{myReg.merchandiseDetails.color}</p>
+                </div>
+              )}
+              {myReg.merchandiseDetails.variant && (
+                <div className="bg-white/5 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 uppercase">Variant</p>
+                  <p className="font-semibold text-gray-200 mt-0.5">{myReg.merchandiseDetails.variant}</p>
+                </div>
+              )}
+              {myReg.merchandiseDetails.quantity && (
+                <div className="bg-white/5 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 uppercase">Quantity</p>
+                  <p className="font-semibold text-gray-200 mt-0.5">{myReg.merchandiseDetails.quantity}</p>
+                </div>
+              )}
+            </div>
+            {myReg.paymentProof && (
+              <div>
+                <p className="text-sm font-medium text-gray-300 mb-2">Payment Proof</p>
+                <img src={myReg.paymentProof} alt="Payment proof" className="max-h-64 rounded-xl border border-white/10" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Filled form responses for existing normal event registrations */}
+        {myReg && event.eventType === 'Normal' && myReg.formResponses && Object.keys(myReg.formResponses).length > 0 && (
+          <div className="border-t border-white/10 pt-6 mt-4">
+            <h2 className="text-lg font-semibold text-gray-200 mb-3">Your Form Responses</h2>
+            <div className="space-y-3 text-sm">
+              {Object.entries(myReg.formResponses).map(([key, value]) => (
+                <div key={key} className="bg-white/5 rounded-lg p-3">
+                  <p className="text-xs text-gray-500 uppercase">{key}</p>
+                  <p className="font-semibold text-gray-200 mt-0.5">
+                    {Array.isArray(value) ? value.join(', ') : typeof value === 'string' && value.startsWith('data:') ? (
+                      <a href={value} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">View Attachment</a>
+                    ) : String(value)}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
@@ -344,22 +430,29 @@ const EventDetails = () => {
             {['details', 'discussion', 'feedback'].map((t) => (
               <button
                 key={t}
-                onClick={() => setDetailTab(t)}
-                className={`px-5 py-2.5 text-sm font-medium border-b-2 transition -mb-px capitalize ${
+                onClick={() => {
+                  setDetailTab(t);
+                  if (t === 'discussion') setForumUnread(0);
+                }}
+                className={`px-5 py-2.5 text-sm font-medium border-b-2 transition -mb-px capitalize relative ${
                   detailTab === t ? 'border-indigo-400 text-indigo-400' : 'border-transparent text-gray-500 hover:text-gray-300'
                 }`}
               >
                 {t}
+                {t === 'discussion' && forumUnread > 0 && detailTab !== 'discussion' && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                    {forumUnread > 99 ? '99+' : forumUnread}
+                  </span>
+                )}
               </button>
             ))}
           </div>
 
-          {detailTab === 'discussion' && (
-            <div className="bg-[#12122a] rounded-2xl border border-indigo-500/20 p-6">
-              <h2 className="text-lg font-semibold text-gray-200 mb-4">Discussion</h2>
-              <ForumDiscussion eventId={id} isOrganizer={false} />
-            </div>
-          )}
+          {/* Forum always mounted for SSE notifications, hidden when not on discussion tab */}
+          <div className={detailTab === 'discussion' ? 'bg-[#12122a] rounded-2xl border border-indigo-500/20 p-6' : 'hidden'}>
+            <h2 className="text-lg font-semibold text-gray-200 mb-4">Discussion</h2>
+            <ForumDiscussion eventId={id} isOrganizer={false} onNewMessage={() => { if (detailTab !== 'discussion') setForumUnread((c) => c + 1); }} />
+          </div>
 
           {detailTab === 'feedback' && (
             <div className="bg-[#12122a] rounded-2xl border border-indigo-500/20 p-6">

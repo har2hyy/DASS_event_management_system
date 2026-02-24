@@ -5,10 +5,10 @@ const {
   createEvent, updateEvent, publishEvent,
   deleteEvent, updateCustomForm,
 } = require('../controllers/eventController');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, authorize, optionalAuth } = require('../middleware/auth');
 
-// Public
-router.get('/',          getEvents);
+// Public (optionalAuth attaches req.user when logged in, for followed-clubs filter)
+router.get('/',          optionalAuth, getEvents);
 router.get('/tags',      getAllowedTags);
 router.get('/trending',  getTrendingEvents);
 router.get('/:id',       getEventById);

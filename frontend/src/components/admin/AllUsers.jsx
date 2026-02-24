@@ -9,6 +9,7 @@ const AllUsers = () => {
   const [loading, setLoading] = useState(true);
   const [role,    setRole]    = useState('All');
   const [search,  setSearch]  = useState('');
+  const [deleting, setDeleting] = useState(null);
 
   const load = async (r) => {
     setLoading(true);
@@ -21,6 +22,18 @@ const AllUsers = () => {
   };
 
   useEffect(() => { load(role); }, [role]);
+
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`Permanently delete user "${name}"?\n\nThis will remove all their registrations, messages, and free up event slots.`)) return;
+    setDeleting(id);
+    try {
+      await adminAPI.deleteUser(id);
+      setUsers((prev) => prev.filter((u) => u._id !== id));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Delete failed');
+    }
+    setDeleting(null);
+  };
 
   const filtered = users.filter((u) => {
     const s = search.toLowerCase();
@@ -60,14 +73,14 @@ const AllUsers = () => {
           <table className="w-full text-sm">
             <thead className="bg-white/5 border-b border-white/10">
               <tr>
-                {['Name / Org', 'Email', 'Role', 'Joined', 'Details'].map((h) => (
+                {['Name / Org', 'Email', 'Role', 'Joined', 'Details', 'Actions'].map((h) => (
                   <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {filtered.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-10 text-gray-500">No users found.</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-gray-500">No users found.</td></tr>
               ) : filtered.map((u) => (
                 <tr key={u._id} className="hover:bg-white/5 transition">
                   <td className="px-4 py-3 font-medium text-gray-200">
@@ -86,6 +99,17 @@ const AllUsers = () => {
                   <td className="px-4 py-3 text-gray-400">{new Date(u.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {u.role === 'Participant' ? u.college || '—' : u.category || '—'}
+                  </td>
+                  <td className="px-4 py-3">
+                    {u.role === 'Participant' && (
+                      <button
+                        onClick={() => handleDelete(u._id, `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email)}
+                        disabled={deleting === u._id}
+                        className="text-red-400 hover:text-red-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-red-500/30 hover:bg-red-500/10 transition disabled:opacity-50"
+                      >
+                        {deleting === u._id ? 'Removing…' : 'Remove'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

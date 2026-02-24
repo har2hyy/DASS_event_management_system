@@ -83,6 +83,11 @@ exports.login = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
+    // Block archived / disabled accounts
+    if (user.isArchived) {
+      return res.status(403).json({ success: false, message: 'Your account has been archived by an administrator. Please contact support.' });
+    }
+
     const token = generateToken(user._id);
     res.json({ success: true, token, user: userPayload(user) });
   } catch (err) {
@@ -122,7 +127,7 @@ exports.changePassword = async (req, res) => {
     }
 
     user.password = newPassword;
-    await user.save();
+    await user.save({ validateModifiedOnly: true });
     res.json({ success: true, message: 'Password updated successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error', error: err.message });

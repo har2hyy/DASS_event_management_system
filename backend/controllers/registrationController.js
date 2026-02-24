@@ -37,9 +37,16 @@ exports.registerForEvent = async (req, res) => {
       return res.status(403).json({ success: false, message: 'This event is open to IIIT participants only' });
     }
 
-    // Duplicate check
+    // Duplicate check — allow re-registration if previous was Rejected or Cancelled
     const dup = await Registration.findOne({ participant: req.user._id, event: event._id });
-    if (dup) return res.status(400).json({ success: false, message: 'Already registered for this event' });
+    if (dup) {
+      if (['Rejected', 'Cancelled'].includes(dup.status)) {
+        await Registration.deleteOne({ _id: dup._id });
+        // Restore slot for cancelled normal events (rejected merch stock already restored)
+      } else {
+        return res.status(400).json({ success: false, message: 'Already registered for this event' });
+      }
+    }
 
     const regData = {
       participant: req.user._id,
@@ -64,10 +71,10 @@ exports.registerForEvent = async (req, res) => {
         });
       }
 
-      // Atomic stock check & decrement
+      // Atomic stock check & decrement (reserve stock, but do NOT increment currentRegistrations yet — that happens on approval)
       const stockResult = await Event.findOneAndUpdate(
         { _id: event._id, 'itemDetails.stock': { $gte: quantity } },
-        { $inc: { 'itemDetails.stock': -quantity, currentRegistrations: 1 } },
+        { $inc: { 'itemDetails.stock': -quantity } },
         { new: true }
       );
       if (!stockResult) {
@@ -98,21 +105,23 @@ exports.registerForEvent = async (req, res) => {
       }
     }
 
-    // Generate QR
-    const qrCode = await generateQR(registration.ticketId);
-    await Registration.findByIdAndUpdate(registration._id, { qrCode });
-    registration.qrCode = qrCode;
+    // Generate QR + send ticket email only for non-Pending registrations (Normal events)
+    if (registration.status !== 'Pending') {
+      const qrCode = await generateQR(registration.ticketId);
+      await Registration.findByIdAndUpdate(registration._id, { qrCode });
+      registration.qrCode = qrCode;
 
-    // Send email (non-blocking)
-    const fullName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.email;
-    sendTicketEmail({
-      to:        req.user.email,
-      name:      fullName,
-      eventName: event.eventName,
-      ticketId:  registration.ticketId,
-      qrCode,
-      eventDate: event.eventStartDate,
-    });
+      // Send email (non-blocking)
+      const fullName = `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || req.user.email;
+      sendTicketEmail({
+        to:        req.user.email,
+        name:      fullName,
+        eventName: event.eventName,
+        ticketId:  registration.ticketId,
+        qrCode,
+        eventDate: event.eventStartDate,
+      });
+    }
 
     res.status(201).json({ success: true, registration });
   } catch (err) {
@@ -183,15 +192,22 @@ exports.cancelRegistration = async (req, res) => {
       return res.status(400).json({ success: false, message: `Cannot cancel a registration with status '${reg.status}'` });
     }
 
+    const prevStatus = reg.status;
     reg.status = 'Cancelled';
     await reg.save();
 
     // Restore slot / stock atomically
-    const incOps = { currentRegistrations: -1 };
+    // Only decrement currentRegistrations if it was actually counted (Registered/Attended)
+    const incOps = {};
+    if (['Registered', 'Attended'].includes(prevStatus)) {
+      incOps.currentRegistrations = -1;
+    }
     if (reg.merchandiseDetails?.quantity) {
       incOps['itemDetails.stock'] = reg.merchandiseDetails.quantity;
     }
-    await Event.findByIdAndUpdate(reg.event, { $inc: incOps });
+    if (Object.keys(incOps).length > 0) {
+      await Event.findByIdAndUpdate(reg.event, { $inc: incOps });
+    }
 
     res.json({ success: true, message: 'Registration cancelled' });
   } catch (err) {
@@ -210,8 +226,8 @@ exports.uploadPaymentProof = async (req, res) => {
     if (reg.participant.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
-    if (reg.status !== 'Pending') {
-      return res.status(400).json({ success: false, message: 'Payment proof can only be uploaded for pending registrations' });
+    if (reg.status !== 'Pending' && reg.status !== 'Rejected') {
+      return res.status(400).json({ success: false, message: 'Payment proof can only be uploaded for pending or rejected registrations' });
     }
 
     const { paymentProof } = req.body;
@@ -220,6 +236,10 @@ exports.uploadPaymentProof = async (req, res) => {
     }
 
     reg.paymentProof = paymentProof;
+    // If rejected, reset to Pending so organizer can review again
+    if (reg.status === 'Rejected') {
+      reg.status = 'Pending';
+    }
     await reg.save();
 
     res.json({ success: true, registration: reg });

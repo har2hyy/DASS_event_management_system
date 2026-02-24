@@ -91,17 +91,23 @@ exports.getOrganizers = async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 exports.followOrganizer = async (req, res) => {
   try {
-    const me = await User.findById(req.user._id);
+    const userId = req.user._id;
     const orgId = req.params.organizerId;
 
-    const idx = me.followedOrganizers.findIndex((id) => id.toString() === orgId);
-    if (idx === -1) {
-      me.followedOrganizers.push(orgId);
-    } else {
-      me.followedOrganizers.splice(idx, 1);
-    }
-    await me.save();
-    res.json({ success: true, followedOrganizers: me.followedOrganizers });
+    // Check current follow state
+    const me = await User.findById(userId).select('followedOrganizers');
+    const isFollowing = me.followedOrganizers.some((id) => id.toString() === orgId);
+
+    // Use atomic update to avoid full-document validation (which can fail
+    // for users with legacy data that doesn't pass newly-added validators).
+    const update = isFollowing
+      ? { $pull:     { followedOrganizers: orgId } }
+      : { $addToSet: { followedOrganizers: orgId } };
+
+    const updated = await User.findByIdAndUpdate(userId, update, { new: true })
+      .select('followedOrganizers');
+
+    res.json({ success: true, followedOrganizers: updated.followedOrganizers });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

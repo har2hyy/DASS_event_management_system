@@ -1,3 +1,2 @@
-Frontend URL: https://<YOUR-VERCEL-APP>.vercel.app
-Backend URL:  https://<YOUR-RENDER-APP>.onrender.com
-Database:     MongoDB Atlas (cloud.mongodb.com)
+Frontend URL: https://dass-event-management-system.vercel.app/
+Backend URL:  https://dass-event-management-system.onrender.com

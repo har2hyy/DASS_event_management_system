@@ -23,27 +23,51 @@ const transporter = nodemailer.createTransport({
 exports.sendTicketEmail = async ({ to, name, eventName, ticketId, qrCode, eventDate }) => {
   if (!process.env.EMAIL_USER) return; // Skip if not configured
 
+  // Extract base64 data from the DataURL (strip "data:image/png;base64," prefix)
+  const qrBase64 = qrCode ? qrCode.replace(/^data:image\/png;base64,/, '') : null;
+
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:auto">
-      <h2 style="color:#6366f1">Felicity 2026 — Registration Confirmed 🎉</h2>
-      <p>Hi <strong>${name}</strong>,</p>
-      <p>You are successfully registered for <strong>${eventName}</strong>.</p>
-      <table style="border-collapse:collapse;width:100%">
-        <tr><td style="padding:8px;border:1px solid #e5e7eb"><strong>Ticket ID</strong></td><td style="padding:8px;border:1px solid #e5e7eb">${ticketId}</td></tr>
-        <tr><td style="padding:8px;border:1px solid #e5e7eb"><strong>Event Date</strong></td><td style="padding:8px;border:1px solid #e5e7eb">${new Date(eventDate).toDateString()}</td></tr>
-      </table>
-      ${qrCode ? `<p>Show the QR code below at the venue:</p><img src="${qrCode}" alt="QR Code" style="width:180px;height:180px"/>` : ''}
-      <p style="color:#6b7280;font-size:12px">This is an automated message — please do not reply.</p>
+      <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:24px 32px;border-radius:12px 12px 0 0;text-align:center">
+        <h1 style="color:#fff;margin:0;font-size:24px">Felicity 2026</h1>
+      </div>
+      <div style="padding:24px 32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
+        <h2 style="color:#6366f1">Registration Confirmed 🎉</h2>
+        <p>Hi <strong>${name}</strong>,</p>
+        <p>You are successfully registered for <strong>${eventName}</strong>.</p>
+        <table style="border-collapse:collapse;width:100%">
+          <tr><td style="padding:8px;border:1px solid #e5e7eb"><strong>Ticket ID</strong></td><td style="padding:8px;border:1px solid #e5e7eb">${ticketId}</td></tr>
+          <tr><td style="padding:8px;border:1px solid #e5e7eb"><strong>Event Date</strong></td><td style="padding:8px;border:1px solid #e5e7eb">${new Date(eventDate).toDateString()}</td></tr>
+        </table>
+        ${qrBase64 ? `
+        <p style="margin-top:16px"><strong>Show this QR code at the venue:</strong></p>
+        <img src="cid:qrcode" alt="QR Code" style="width:180px;height:180px;display:block;margin:8px 0"/>
+        ` : ''}
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0 12px"/>
+        <p style="color:#9ca3af;font-size:11px;text-align:center">This is an automated message — please do not reply.</p>
+      </div>
     </div>
   `;
 
   try {
-    await transporter.sendMail({
+    const mailOptions = {
       from:    process.env.EMAIL_FROM || process.env.EMAIL_USER,
       to,
       subject: `[Felicity] Registration Confirmed — ${eventName}`,
       html,
-    });
+    };
+
+    // Attach QR code as inline CID image so email clients render it correctly
+    if (qrBase64) {
+      mailOptions.attachments = [{
+        filename:    'qrcode.png',
+        content:     Buffer.from(qrBase64, 'base64'),
+        cid:         'qrcode',          // referenced as cid:qrcode in html
+        contentType: 'image/png',
+      }];
+    }
+
+    await transporter.sendMail(mailOptions);
   } catch (err) {
     console.error('Email send error:', err.message);
   }

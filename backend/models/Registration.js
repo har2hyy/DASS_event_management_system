@@ -29,13 +29,18 @@ const registrationSchema = new mongoose.Schema(
     // Attendance
     attended:            { type: Boolean, default: false },
     attendanceTimestamp: Date,
+
+    // Audit trail for attendance
+    attendanceMethod: { type: String, enum: ['scan', 'manual'], default: null },
+    attendanceMarkedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    overrideReason: { type: String, default: '' },
   },
   { timestamps: true }
 );
 
-// Auto-generate ticket ID before first save
+// Auto-generate ticket ID before first save (skip for Pending — generated on approval)
 registrationSchema.pre('save', function () {
-  if (!this.ticketId) {
+  if (!this.ticketId && this.status !== 'Pending') {
     const crypto = require('node:crypto');
     const ts = Date.now().toString(36).toUpperCase();
     const rand = crypto.randomBytes(4).toString('hex').toUpperCase();

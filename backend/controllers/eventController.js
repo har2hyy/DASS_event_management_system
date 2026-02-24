@@ -38,19 +38,42 @@ exports.getEvents = async (req, res) => {
       const me = await require('../models/User').findById(req.user._id);
       if (me?.followedOrganizers?.length) {
         query.organizer = { $in: me.followedOrganizers };
+      } else {
+        // Following nobody → return empty results
+        return res.json({ success: true, count: 0, total: 0, events: [] });
       }
     }
 
     let events;
     if (search) {
-      events = await Event.find({
+      // Build two patterns:
+      // 1. Substring match (exact partial): "gam" → /gam/i
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const substringRe = new RegExp(escaped, 'i');
+
+      // 2. Fuzzy match (chars in order with gaps): "gmng" → /g.*m.*n.*g/i
+      const fuzzyPattern = search.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*');
+      const fuzzyRe = new RegExp(fuzzyPattern, 'i');
+
+      // Fetch candidates matching either pattern
+      const searchQuery = {
         ...query,
-        $text: { $search: search },
-      })
+        $or: [
+          { eventName: substringRe },
+          { eventDescription: substringRe },
+          { eventTags: substringRe },
+          { eventName: fuzzyRe },
+        ],
+      };
+
+      events = await Event.find(searchQuery)
         .populate('organizer', 'organizerName category')
-        .sort({ score: { $meta: 'textScore' }, currentRegistrations: -1 })
+        .sort({ currentRegistrations: -1, createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(Number(limit));
+
+      const total2 = await Event.countDocuments(searchQuery);
+      return res.json({ success: true, count: events.length, total: total2, events });
     } else {
       events = await Event.find(query)
         .populate('organizer', 'organizerName category')
@@ -83,9 +106,9 @@ exports.getTrendingEvents = async (req, res) => {
   try {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000); // last 24 h
 
-    // Count registrations per event in the last 24 h
+    // Count registrations per event in the last 24 h (exclude cancelled/rejected)
     const trending = await Registration.aggregate([
-      { $match: { createdAt: { $gte: since } } },
+      { $match: { createdAt: { $gte: since }, status: { $nin: ['Cancelled', 'Rejected'] } } },
       { $group: { _id: '$event', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 5 },
@@ -141,6 +164,14 @@ exports.createEvent = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Registration deadline must be on or before end date' });
     }
 
+    // Limit / fee validation
+    if (req.body.registrationLimit !== undefined && Number(req.body.registrationLimit) < 1) {
+      return res.status(400).json({ success: false, message: 'Registration limit must be at least 1' });
+    }
+    if (req.body.registrationFee !== undefined && Number(req.body.registrationFee) < 0) {
+      return res.status(400).json({ success: false, message: 'Registration fee cannot be negative' });
+    }
+
     // Tag validation
     if (eventTags && eventTags.length > 0) {
       const invalid = eventTags.filter((t) => !ALLOWED_TAGS.includes(t.toLowerCase()));
@@ -151,6 +182,14 @@ exports.createEvent = async (req, res) => {
     }
 
     const eventData = { ...req.body, organizer: req.user._id, status: 'Draft' };
+
+    // Strip irrelevant type-specific fields
+    if (eventData.eventType !== 'Merchandise') {
+      delete eventData.itemDetails;
+    } else {
+      delete eventData.customForm;
+    }
+
     const event = await Event.create(eventData);
     res.status(201).json({ success: true, event });
   } catch (err) {
@@ -194,11 +233,21 @@ exports.updateEvent = async (req, res) => {
       updates.eventTags = updates.eventTags.map((t) => t.toLowerCase());
     }
 
+    // ── Status transition validation ──
+    if (updates.status && updates.status !== status) {
+      const VALID_TRANSITIONS = {
+        Draft:     ['Published'],
+        Published: ['Ongoing', 'Cancelled'],
+        Ongoing:   ['Completed', 'Cancelled'],
+      };
+      const allowed = VALID_TRANSITIONS[status] || [];
+      if (!allowed.includes(updates.status)) {
+        return res.status(400).json({ success: false, message: `Cannot transition from '${status}' to '${updates.status}'` });
+      }
+    }
+
     // Handle cancellation from any active status
     if (updates.status === 'Cancelled') {
-      if (!['Published', 'Ongoing'].includes(status)) {
-        return res.status(400).json({ success: false, message: 'Only Published or Ongoing events can be cancelled' });
-      }
       event.status = 'Cancelled';
       await event.save();
       // Cancel all active registrations
@@ -222,7 +271,10 @@ exports.updateEvent = async (req, res) => {
     }
 
     if (status === 'Draft') {
-      // Free edits
+      // Free edits — but protect customForm.locked if already locked
+      if (updates.customForm && event.customForm?.locked) {
+        return res.status(400).json({ success: false, message: 'Form is locked after first registration and cannot be edited' });
+      }
       Object.assign(event, updates);
     } else if (status === 'Published') {
       const allowed = ['eventDescription', 'registrationDeadline', 'registrationLimit', 'status'];
@@ -298,6 +350,9 @@ exports.deleteEvent = async (req, res) => {
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
     if (event.organizer.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not your event' });
+    }
+    if (event.status !== 'Draft') {
+      return res.status(400).json({ success: false, message: 'Only Draft events can be deleted. Cancel the event instead.' });
     }
 
     // Cascade-delete all registrations for this event

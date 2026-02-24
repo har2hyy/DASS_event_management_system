@@ -26,6 +26,26 @@ exports.protect = async (req, res, next) => {
 };
 
 /**
+ * Optional auth — attaches req.user if token is present, but does NOT block if absent/invalid.
+ * Use on public routes that have optional authenticated behaviour (e.g. followed filter).
+ */
+exports.optionalAuth = async (req, res, next) => {
+  try {
+    let token;
+    if (req.headers.authorization?.startsWith('Bearer')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
+    if (token) {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id);
+    }
+  } catch (_) {
+    // ignore — user stays undefined
+  }
+  next();
+};
+
+/**
  * Role-based access control
  * Usage: authorize('Organizer', 'Admin')
  */

@@ -14,9 +14,9 @@ const seedAdmin = async () => {
       password: process.env.ADMIN_PASSWORD || 'Admin@123456',
       role: 'Admin',
     });
-    console.log('✅ Admin account seeded');
+    console.log('Admin account seeded');
   } catch (err) {
-    console.error('❌ Admin seed error:', err.message);
+    console.error('Admin seed error:', err.message);
   }
 };
 
