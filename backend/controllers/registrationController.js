@@ -25,7 +25,9 @@ exports.registerForEvent = async (req, res) => {
     if (!['Published', 'Ongoing'].includes(event.status)) {
       return res.status(400).json({ success: false, message: 'Event is not open for registration' });
     }
-    if (new Date() > event.registrationDeadline) {
+    const deadlineEnd = new Date(event.registrationDeadline);
+    deadlineEnd.setHours(23, 59, 59, 999);
+    if (new Date() > deadlineEnd) {
       return res.status(400).json({ success: false, message: 'Registration deadline has passed' });
     }
     if (event.currentRegistrations >= event.registrationLimit) {

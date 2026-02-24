@@ -33,10 +33,10 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
-      <div className="bg-white shadow-xl rounded-2xl p-6 md:p-8 w-full max-w-xl">
-        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-1">Welcome to Felicity! 🎉</h2>
-        <p className="text-gray-500 mb-6">Select your areas of interest to get personalised event recommendations.</p>
+    <div className="min-h-screen flex items-center justify-center bg-[#0a0a14]">
+      <div className="bg-[#12122a] border border-indigo-500/20 rounded-2xl p-6 md:p-8 w-full max-w-xl">
+        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-100 mb-1">Welcome to Felicity! 🎉</h2>
+        <p className="text-gray-400 mb-6">Select your areas of interest to get personalised event recommendations.</p>
 
         <div className="flex flex-wrap gap-2 mb-8">
           {INTERESTS.map((item) => (
@@ -46,7 +46,7 @@ const Onboarding = () => {
               className={`px-4 py-2.5 rounded-full text-sm font-medium border transition ${
                 interests.includes(item)
                   ? 'bg-indigo-600 text-white border-indigo-600'
-                  : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'
+                  : 'bg-white/5 text-gray-400 border-gray-600 hover:border-indigo-400'
               }`}
             >
               {item}
@@ -63,7 +63,7 @@ const Onboarding = () => {
           </button>
           <button
             onClick={() => submit(true)} disabled={loading}
-            className="px-6 border border-gray-300 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition"
+            className="px-6 border border-white/10 text-gray-400 hover:bg-white/5 rounded-lg font-medium transition"
           >
             Skip
           </button>

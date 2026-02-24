@@ -299,11 +299,16 @@ exports.deleteEvent = async (req, res) => {
     if (event.organizer.toString() !== req.user._id.toString()) {
       return res.status(403).json({ success: false, message: 'Not your event' });
     }
-    if (event.status !== 'Draft') {
-      return res.status(400).json({ success: false, message: 'Only Draft events can be deleted' });
-    }
+
+    // Cascade-delete all registrations for this event
+    await Registration.deleteMany({ event: event._id });
+
+    // Delete forum messages and feedback if models exist
+    try { const Message  = require('../models/Message');  await Message.deleteMany({ event: event._id }); } catch (_) {}
+    try { const Feedback = require('../models/Feedback'); await Feedback.deleteMany({ event: event._id }); } catch (_) {}
+
     await event.deleteOne();
-    res.json({ success: true, message: 'Event deleted' });
+    res.json({ success: true, message: 'Event and all associated data deleted' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

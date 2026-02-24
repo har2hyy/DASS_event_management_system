@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import jsQR from 'jsqr';
 import { organizerAPI } from '../../services/api';
 
 const QRScannerAttendance = ({ eventId }) => {
@@ -97,7 +98,9 @@ const QRScannerAttendance = ({ eventId }) => {
       canvas.height = video.videoHeight;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Try BarcodeDetector API if available
+      let decoded = null;
+
+      // Try BarcodeDetector API first if available (faster, native)
       if ('BarcodeDetector' in window) {
         try {
           if (!detectorRef.current) {
@@ -105,17 +108,33 @@ const QRScannerAttendance = ({ eventId }) => {
           }
           const barcodes = await detectorRef.current.detect(canvas);
           if (barcodes.length > 0) {
-            const code = barcodes[0].rawValue;
-            if (code && code.startsWith('FEL-') && code !== lastScannedRef.current) {
-              lastScannedRef.current = code;
-              await processTicket(code);
-              // Debounce: prevent re-scanning same ticket for 3s
-              setTimeout(() => { lastScannedRef.current = ''; }, 3000);
-            }
+            decoded = barcodes[0].rawValue;
           }
         } catch (e) {
-          // detector failed, continue scanning
+          // detector failed, fall through to jsQR
         }
+      }
+
+      // Fallback to jsQR (works everywhere)
+      if (!decoded) {
+        try {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const qrResult = jsQR(imageData.data, canvas.width, canvas.height, {
+            inversionAttempts: 'dontInvert',
+          });
+          if (qrResult) {
+            decoded = qrResult.data;
+          }
+        } catch (e) {
+          // jsQR failed, continue scanning
+        }
+      }
+
+      if (decoded && decoded.startsWith('FEL-') && decoded !== lastScannedRef.current) {
+        lastScannedRef.current = decoded;
+        await processTicket(decoded);
+        // Debounce: prevent re-scanning same ticket for 3s
+        setTimeout(() => { lastScannedRef.current = ''; }, 3000);
       }
     }
 

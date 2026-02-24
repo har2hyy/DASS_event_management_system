@@ -37,7 +37,7 @@ const OrganizersList = () => {
   return (
     <div className="min-h-screen bg-[#0a0a14]">
     <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-[0_0_50px_rgba(99,102,241,0.35)]">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Clubs & Organizers</h1>
         <p className="text-purple-100 mt-1 md:text-lg">Follow your favourite clubs to get event updates</p>
       </div>

@@ -58,13 +58,13 @@ const OrganizerProfile = () => {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 md:py-10">
-      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 mb-6">Organizer Profile</h1>
+      <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-100 mb-6">Organizer Profile</h1>
 
-      <div className="flex gap-1 border-b border-gray-200 mb-6 overflow-x-auto">
+      <div className="flex gap-1 border-b border-white/10 mb-6 overflow-x-auto">
         {['profile', 'password', 'reset request'].map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-5 py-3 text-sm font-medium border-b-2 transition -mb-px capitalize whitespace-nowrap ${
-              tab === t ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'
+              tab === t ? 'border-indigo-400 text-indigo-400' : 'border-transparent text-gray-500 hover:text-gray-300'
             }`}>
             {t}
           </button>
@@ -72,11 +72,11 @@ const OrganizerProfile = () => {
       </div>
 
       {tab === 'profile' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 space-y-4">
+        <div className="bg-[#12122a] rounded-2xl border border-indigo-500/20 p-5 md:p-6 space-y-4">
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Login Email (read-only)</label>
             <input type="text" value={user.email} disabled
-              className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm text-gray-500 cursor-not-allowed" />
+              className="w-full border border-gray-700 bg-white/5 rounded-lg px-4 py-3 text-sm text-gray-500 cursor-not-allowed" />
           </div>
           {[
             { key: 'organizerName',  label: 'Organizer / Club Name', type: 'text' },
@@ -87,21 +87,21 @@ const OrganizerProfile = () => {
             { key: 'discordWebhook', label: 'Discord Webhook URL',   type: 'url' },
           ].map(({ key, label, type }) => (
             <div key={key}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
               {type === 'textarea' ? (
                 <textarea rows={3} value={info[key]}
                   onChange={(e) => setInfo({ ...info, [key]: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                  className="w-full bg-white/5 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
               ) : (
                 <input type={type} value={info[key]}
                   onChange={(e) => setInfo({ ...info, [key]: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                  className="w-full bg-white/5 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
               )}
             </div>
           ))}
 
-          {infoMsg && <p className="text-green-600 text-sm">{infoMsg}</p>}
-          {infoErr && <p className="text-red-500 text-sm">{infoErr}</p>}
+          {infoMsg && <p className="text-green-400 text-sm">{infoMsg}</p>}
+          {infoErr && <p className="text-red-400 text-sm">{infoErr}</p>}
 
           <button onClick={handleInfoSave} disabled={saving}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-60">
@@ -111,22 +111,22 @@ const OrganizerProfile = () => {
       )}
 
       {tab === 'password' && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 space-y-4">
+        <div className="bg-[#12122a] rounded-2xl border border-indigo-500/20 p-5 md:p-6 space-y-4">
           {[
             { key: 'currentPassword', label: 'Current Password' },
             { key: 'newPassword',     label: 'New Password' },
             { key: 'confirmPassword', label: 'Confirm New Password' },
           ].map(({ key, label }) => (
             <div key={key}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">{label}</label>
               <input type="password" value={pwd[key]}
                 onChange={(e) => setPwd({ ...pwd, [key]: e.target.value })}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+                className="w-full bg-white/5 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" />
             </div>
           ))}
 
-          {pwdMsg && <p className="text-green-600 text-sm">{pwdMsg}</p>}
-          {pwdErr && <p className="text-red-500 text-sm">{pwdErr}</p>}
+          {pwdMsg && <p className="text-green-400 text-sm">{pwdMsg}</p>}
+          {pwdErr && <p className="text-red-400 text-sm">{pwdErr}</p>}
 
           <button onClick={handlePwdSave} disabled={saving}
             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition disabled:opacity-60">
@@ -178,9 +178,9 @@ const PasswordResetTab = () => {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 space-y-4">
-        <h3 className="font-semibold text-gray-700">Request Password Reset</h3>
-        <p className="text-sm text-gray-500">
+      <div className="bg-[#12122a] rounded-2xl border border-indigo-500/20 p-5 md:p-6 space-y-4">
+        <h3 className="font-semibold text-gray-200">Request Password Reset</h3>
+        <p className="text-sm text-gray-400">
           If you have forgotten your password, submit a request and an admin will reset it for you.
         </p>
         <textarea
@@ -189,10 +189,10 @@ const PasswordResetTab = () => {
           onChange={(e) => setReason(e.target.value)}
           placeholder="Reason for password reset…"
           maxLength={500}
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+          className="w-full bg-white/5 border border-gray-600 rounded-lg px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
-        {msg && <p className="text-green-600 text-sm">{msg}</p>}
-        {err && <p className="text-red-500 text-sm">{err}</p>}
+        {msg && <p className="text-green-400 text-sm">{msg}</p>}
+        {err && <p className="text-red-400 text-sm">{err}</p>}
         <button
           onClick={handleSubmit}
           disabled={submitting || !reason.trim()}
@@ -204,20 +204,20 @@ const PasswordResetTab = () => {
 
       {/* History */}
       {!loading && requests.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
-          <h3 className="font-semibold text-gray-700 mb-3">Request History</h3>
+        <div className="bg-[#12122a] rounded-2xl border border-indigo-500/20 p-5 md:p-6">
+          <h3 className="font-semibold text-gray-200 mb-3">Request History</h3>
           <div className="space-y-2">
             {requests.map((r) => (
-              <div key={r._id} className="border border-gray-100 rounded-lg p-3 text-sm">
+              <div key={r._id} className="border border-white/10 rounded-lg p-3 text-sm">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-gray-500 text-xs">{new Date(r.createdAt).toLocaleString()}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                    r.status === 'Pending'  ? 'bg-yellow-100 text-yellow-700' :
-                    r.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                    'bg-red-100 text-red-700'
+                    r.status === 'Pending'  ? 'bg-yellow-500/20 text-yellow-400' :
+                    r.status === 'Approved' ? 'bg-green-500/20 text-green-400' :
+                    'bg-red-500/20 text-red-400'
                   }`}>{r.status}</span>
                 </div>
-                <p className="text-gray-700">{r.reason}</p>
+                <p className="text-gray-300">{r.reason}</p>
                 {r.adminComment && (
                   <p className="text-xs text-gray-500 mt-1 italic">Admin: {r.adminComment}</p>
                 )}

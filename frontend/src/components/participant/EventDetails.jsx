@@ -18,6 +18,24 @@ const EventDetails = () => {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [registered, setRegistered] = useState(false);
+
+  const handleUnregister = async () => {
+    if (!window.confirm('Are you sure you want to unregister from this event?')) return;
+    setSubmitting(true);
+    setMessage('');
+    try {
+      await registrationAPI.cancel(myReg._id);
+      setMyReg(null);
+      setRegistered(false);
+      setMessage('✅ You have been unregistered from this event.');
+      // Refresh event data to update registration count
+      const res = await eventAPI.getById(id);
+      setEvent(res.data.event);
+    } catch (err) {
+      setMessage(`❌ ${err.response?.data?.message || 'Unregister failed'}`);
+    }
+    setSubmitting(false);
+  };
   const [detailTab, setDetailTab] = useState('details');
   const [myReg, setMyReg] = useState(null);
   const [paymentProof, setPaymentProof] = useState('');
@@ -47,7 +65,9 @@ const EventDetails = () => {
   if (loading) return <LoadingSpinner text="Loading event…" />;
   if (!event) return <div className="text-center py-20 text-gray-400">Event not found</div>;
 
-  const deadlinePassed  = new Date() > new Date(event.registrationDeadline);
+  const deadlineEnd = new Date(event.registrationDeadline);
+  deadlineEnd.setHours(23, 59, 59, 999);
+  const deadlinePassed  = new Date() > deadlineEnd;
   const limitReached    = event.currentRegistrations >= event.registrationLimit;
   const stockExhausted  = event.eventType === 'Merchandise' && event.itemDetails?.stock === 0;
   const isBlocked       = deadlinePassed || limitReached || stockExhausted;
@@ -293,7 +313,7 @@ const EventDetails = () => {
         {/* Registration status badge for existing registrations */}
         {myReg && (
           <div className="border-t border-white/10 pt-4 mt-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <span className="text-sm text-gray-400">Your registration:</span>
               <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                 myReg.status === 'Registered' ? 'bg-green-500/20 text-green-400' :
@@ -303,6 +323,15 @@ const EventDetails = () => {
                 'bg-red-500/20 text-red-400'
               }`}>{myReg.status}</span>
               {myReg.ticketId && <span className="font-mono text-xs text-gray-400">{myReg.ticketId}</span>}
+              {['Registered', 'Pending'].includes(myReg.status) && (
+                <button
+                  onClick={handleUnregister}
+                  disabled={submitting}
+                  className="ml-auto text-red-400 hover:text-red-300 text-xs font-semibold px-4 py-1.5 rounded-lg border border-red-500/30 hover:bg-red-500/10 transition disabled:opacity-50"
+                >
+                  {submitting ? 'Unregistering…' : 'Unregister'}
+                </button>
+              )}
             </div>
           </div>
         )}

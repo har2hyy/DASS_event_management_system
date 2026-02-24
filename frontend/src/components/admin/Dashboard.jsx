@@ -4,10 +4,10 @@ import { adminAPI } from '../../services/api';
 import LoadingSpinner from '../common/LoadingSpinner';
 
 const STAT_COLORS = {
-  indigo: 'text-indigo-600 bg-indigo-50 border-indigo-100',
-  blue:   'text-blue-600 bg-blue-50 border-blue-100',
-  purple: 'text-purple-600 bg-purple-50 border-purple-100',
-  green:  'text-green-600 bg-green-50 border-green-100',
+  indigo: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30',
+  blue:   'text-blue-400 bg-blue-500/10 border-blue-500/30',
+  purple: 'text-purple-400 bg-purple-500/10 border-purple-500/30',
+  green:  'text-green-400 bg-green-500/10 border-green-500/30',
 };
 
 const AdminDashboard = () => {
@@ -25,7 +25,7 @@ const AdminDashboard = () => {
   if (loading) return <LoadingSpinner text="Loading dashboard…" />;
   if (error) return (
     <div className="w-full px-6 lg:px-12 py-8">
-      <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-6 text-center">
+      <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl p-6 text-center">
         <p className="font-semibold">{error}</p>
         <button onClick={() => window.location.reload()} className="mt-3 bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Retry</button>
       </div>
@@ -40,9 +40,9 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="min-h-screen bg-[#0a0a14]">
     <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-[0_0_50px_rgba(99,102,241,0.35)]">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Admin Dashboard</h1>
         <p className="text-indigo-100 mt-1 md:text-lg">System overview for Felicity 2026</p>
       </div>
@@ -65,10 +65,10 @@ const AdminDashboard = () => {
           { href: '/admin/password-resets', label: 'Password Resets',    desc: 'Review organizer password reset requests',      icon: '🔑' },
         ].map((link) => (
           <Link key={link.href} to={link.href}
-            className="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-gray-100 hover:border-indigo-300 hover:shadow-md transition block group">
+            className="bg-[#12122a] rounded-2xl p-5 md:p-6 border border-indigo-500/20 hover:border-indigo-400/50 hover:shadow-lg hover:shadow-indigo-500/10 transition block group">
             <span className="text-3xl block mb-3">{link.icon}</span>
-            <p className="font-semibold text-gray-800 group-hover:text-indigo-600 transition">{link.label}</p>
-            <p className="text-sm text-gray-400 mt-1">{link.desc}</p>
+            <p className="font-semibold text-gray-200 group-hover:text-indigo-400 transition">{link.label}</p>
+            <p className="text-sm text-gray-500 mt-1">{link.desc}</p>
           </Link>
         ))}
       </div>

@@ -159,6 +159,27 @@ exports.getAllEvents = async (req, res) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// @route  DELETE /api/admin/events/:id
+// @access Private (Admin)
+// ─────────────────────────────────────────────────────────────────────────────
+exports.deleteEvent = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+
+    // Cascade-delete all registrations, messages, feedback
+    await Registration.deleteMany({ event: event._id });
+    try { const Message  = require('../models/Message');  await Message.deleteMany({ event: event._id }); } catch (_) {}
+    try { const Feedback = require('../models/Feedback'); await Feedback.deleteMany({ event: event._id }); } catch (_) {}
+
+    await event.deleteOne();
+    res.json({ success: true, message: 'Event and all associated data deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // @route  GET /api/admin/password-reset-requests
 // @access Private (Admin)
 // ─────────────────────────────────────────────────────────────────────────────

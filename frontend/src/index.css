@@ -49,6 +49,24 @@ html {
   outline-offset: 2px;
 }
 
+/* ── Dark dropdown/select fix ── */
+select,
+select option {
+  background-color: #12122a;
+  color: #e2e8f0;
+}
+
+option:checked {
+  background-color: #4f46e5;
+  color: #fff;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);

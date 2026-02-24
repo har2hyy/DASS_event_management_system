@@ -29,6 +29,7 @@ const Navbar = () => {
     { to: '/admin/organizers',      label: 'Organizers' },
     { to: '/admin/events',          label: 'All Events' },
     { to: '/admin/users',           label: 'Users' },
+    { to: '/admin/password-resets', label: 'Password Resets' },
   ];
 
   const links = user?.role === 'Participant' ? participantLinks

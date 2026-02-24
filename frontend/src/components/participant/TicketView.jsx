@@ -26,7 +26,7 @@ const TicketView = () => {
         ← Back
       </button>
 
-      <div className="bg-[#12122a] rounded-2xl shadow-lg border border-indigo-500/20 p-6 md:p-8">
+      <div className="bg-[#12122a] rounded-2xl shadow-[0_0_40px_rgba(99,102,241,0.2)] border border-indigo-500/30 p-6 md:p-8">
         <div className="text-center mb-6">
           <h1 className="text-xl md:text-2xl font-bold text-indigo-400 mb-1">🎫 Your Ticket</h1>
           <p className="text-gray-400">Felicity 2026</p>

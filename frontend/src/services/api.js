@@ -92,6 +92,7 @@ export const adminAPI = {
   resetPassword:      (id, data)   => api.put(`/admin/organizers/${id}/reset-password`, data),
   getUsers:           (params)     => api.get('/admin/users', { params }),
   getAllEvents:        ()           => api.get('/admin/events'),
+  deleteEvent:         (id)         => api.delete(`/admin/events/${id}`),
   getPasswordResetRequests: (params) => api.get('/admin/password-reset-requests', { params }),
   approvePasswordReset: (id, data) => api.put(`/admin/password-reset-requests/${id}/approve`, data),
   rejectPasswordReset:  (id, data) => api.put(`/admin/password-reset-requests/${id}/reject`, data),

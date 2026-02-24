@@ -32,9 +32,9 @@ const AllUsers = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+    <div className="min-h-screen bg-[#0a0a14]">
     <div className="w-full px-6 sm:px-10 md:px-16 lg:px-24 py-8 md:py-10">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-lg">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl p-6 md:p-8 lg:p-10 mb-8 shadow-[0_0_50px_rgba(99,102,241,0.35)]">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">All Users</h1>
         <p className="text-indigo-100 mt-1 md:text-lg">Browse all participants and organizers</p>
       </div>
@@ -43,47 +43,47 @@ const AllUsers = () => {
         <div className="flex gap-1">
           {ROLES.map((r) => (
             <button key={r} onClick={() => setRole(r)}
-              className={`px-5 py-2 rounded-full text-sm font-medium border transition ${role === r ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-600 border-gray-300 hover:border-indigo-400'}`}>
+              className={`px-5 py-2 rounded-full text-sm font-medium border transition ${role === r ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white/5 text-gray-400 border-gray-600 hover:border-indigo-400'}`}>
               {r}
             </button>
           ))}
         </div>
         <input type="text" value={search} placeholder="Search by name or email…"
           onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400" />
+          className="flex-1 min-w-[200px] bg-white/5 border border-gray-600 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
       </div>
 
       {loading ? (
         <LoadingSpinner text="Loading users…" />
       ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-[#12122a] rounded-xl border border-indigo-500/20 overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-white/5 border-b border-white/10">
               <tr>
                 {['Name / Org', 'Email', 'Role', 'Joined', 'Details'].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-white/5">
               {filtered.length === 0 ? (
-                <tr><td colSpan={5} className="text-center py-10 text-gray-400">No users found.</td></tr>
+                <tr><td colSpan={5} className="text-center py-10 text-gray-500">No users found.</td></tr>
               ) : filtered.map((u) => (
-                <tr key={u._id} className="hover:bg-gray-50/50 transition">
-                  <td className="px-4 py-3 font-medium text-gray-800">
+                <tr key={u._id} className="hover:bg-white/5 transition">
+                  <td className="px-4 py-3 font-medium text-gray-200">
                     {u.role === 'Organizer' ? u.organizerName : `${u.firstName || ''} ${u.lastName || ''}`.trim() || '—'}
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{u.email}</td>
+                  <td className="px-4 py-3 text-gray-400">{u.email}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      u.role === 'Organizer'   ? 'bg-blue-100 text-blue-700' :
-                      u.role === 'Participant' ? 'bg-green-100 text-green-700' :
-                                                 'bg-purple-100 text-purple-700'
+                      u.role === 'Organizer'   ? 'bg-blue-500/20 text-blue-400' :
+                      u.role === 'Participant' ? 'bg-green-500/20 text-green-400' :
+                                                 'bg-purple-500/20 text-purple-400'
                     }`}>
                       {u.role}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-3 text-gray-400">{new Date(u.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {u.role === 'Participant' ? u.college || '—' : u.category || '—'}
                   </td>
